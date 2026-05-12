@@ -46,6 +46,6 @@ export class RateLimitMiddleware implements NestMiddleware {
       });
     }
 
-    next();
+    return next();
   }
 }

@@ -54,7 +54,7 @@ async function main() {
 
     // Show statistics
     const stats = await prisma.product.groupBy({
-      by: ['brand'],
+      by: ['brandId'],
       _count: true,
     });
 
@@ -132,7 +132,7 @@ async function saveProduct(scrapedProduct: ScrapedProduct): Promise<void> {
       brandId: brand.id,
       collection: extractCollection(scrapedProduct.title),
       productType: scrapedProduct.productType,
-      finish: scrapedProduct.finish,
+      finish: scrapedProduct.finish || 'unknown',
       specifications: scrapedProduct.specifications,
       certifications: scrapedProduct.certifications,
       estimatedGrade: estimateGrade(scrapedProduct.price),
@@ -146,7 +146,6 @@ async function saveProduct(scrapedProduct: ScrapedProduct): Promise<void> {
       productId: product.id,
       retailerId: retailer.id,
       price: scrapedProduct.price,
-      msrp: scrapedProduct.msrp,
       url: scrapedProduct.retailerUrl,
       inStock: true,
     },

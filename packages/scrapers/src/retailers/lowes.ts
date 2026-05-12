@@ -88,7 +88,7 @@ async function searchLowes(searchTerm: string, limit = 20): Promise<ScrapedProdu
       '[class*="product-item"]',
     ];
 
-    let productElements = $();
+    let productElements = $('*').slice(0, 0); // empty selector
     for (const selector of productSelectors) {
       const elements = $(selector);
       if (elements.length > 0) {

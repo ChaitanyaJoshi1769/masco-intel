@@ -8,6 +8,8 @@ import { ContractorModule } from './modules/contractor/contractor.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { SavedProductsModule } from './modules/saved-products/saved-products.module';
 import { PriceAlertsModule } from './modules/price-alerts/price-alerts.module';
+import { RecommendationsModule } from './modules/recommendations/recommendations.module';
+import { ComparisonModule } from './modules/comparison/comparison.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -19,6 +21,8 @@ import { HealthController } from './health.controller';
     AuthModule,
     SavedProductsModule,
     PriceAlertsModule,
+    RecommendationsModule,
+    ComparisonModule,
     ProductModule,
     PricingModule,
     MatchingModule,

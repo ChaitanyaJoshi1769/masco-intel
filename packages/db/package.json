@@ -2,6 +2,8 @@
   "name": "@masco/db",
   "version": "0.1.0",
   "description": "Database schemas and migrations",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "migrate": "prisma migrate dev",
     "migrate:prod": "prisma migrate deploy",
@@ -12,6 +14,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@nestjs/common": "^10.3.0",
     "@prisma/client": "^5.10.0"
   },
   "devDependencies": {

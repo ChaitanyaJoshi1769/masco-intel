@@ -2,7 +2,7 @@ import { IsString, IsNumber, IsOptional, IsArray, IsObject } from 'class-validat
 
 export class CreateProductDto {
   @IsString()
-  sku: string;
+  sku!: string;
 
   @IsOptional()
   @IsString()
@@ -13,31 +13,31 @@ export class CreateProductDto {
   mpn?: string;
 
   @IsString()
-  title: string;
+  title!: string;
 
   @IsOptional()
   @IsString()
   description?: string;
 
   @IsString()
-  brand: string;
+  brand!: string;
 
   @IsOptional()
   @IsString()
   collection?: string;
 
   @IsString()
-  productType: string;
+  productType!: string;
 
   @IsString()
-  finish: string;
+  finish!: string;
 
   @IsOptional()
   @IsString()
   valveType?: string;
 
   @IsNumber()
-  price: number;
+  price!: number;
 
   @IsOptional()
   @IsString()

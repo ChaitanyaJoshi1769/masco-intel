@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { helmet } from 'helmet';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './errors/exception.filter';
 import { RateLimitMiddleware } from './middleware/rate-limit.middleware';
