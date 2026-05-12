@@ -11,7 +11,13 @@
     "lint": "turbo run lint",
     "format": "turbo run format",
     "type-check": "turbo run type-check",
-    "clean": "turbo run clean && rm -rf node_modules dist build .turbo"
+    "clean": "turbo run clean && rm -rf node_modules dist build .turbo",
+    "scrape": "cd packages/scrapers && pnpm dev",
+    "scrape:homedepot": "cd packages/scrapers && pnpm scrape:homedepot",
+    "scrape:lowes": "cd packages/scrapers && pnpm scrape:lowes",
+    "db:seed": "cd packages/db && pnpm seed",
+    "db:migrate": "cd packages/db && pnpm migrate",
+    "db:studio": "cd packages/db && pnpm studio"
   },
   "devDependencies": {
     "turbo": "^2.0.0",
