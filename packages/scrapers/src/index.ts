@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { scrapeHomeDepot } from './retailers/home-depot';
 import { scrapeLowes } from './retailers/lowes';
+import { scrapeAmazon } from './retailers/amazon';
+import { scrapeWayfair } from './retailers/wayfair';
 import { ScrapedProduct } from './types';
 
 const prisma = new PrismaClient();
@@ -11,19 +13,29 @@ async function main() {
   const startTime = Date.now();
 
   try {
-    // Run both scrapers in parallel
-    const [homeDepotResult, lowesResult] = await Promise.all([
-      scrapeHomeDepot(['delta faucet', 'brizo bathroom', 'hansgrohe kitchen', 'moen faucet'], 50),
-      scrapeLowes(['delta faucet', 'brizo bathroom', 'hansgrohe kitchen', 'moen faucet'], 50),
+    // Run all scrapers in parallel
+    const [homeDepotResult, lowesResult, amazonResult, wayfairResult] = await Promise.all([
+      scrapeHomeDepot(['delta faucet', 'brizo bathroom', 'hansgrohe kitchen', 'moen faucet'], 40),
+      scrapeLowes(['delta faucet', 'brizo bathroom', 'hansgrohe kitchen', 'moen faucet'], 40),
+      scrapeAmazon(['delta faucet', 'brizo bathroom', 'hansgrohe kitchen', 'moen faucet'], 40),
+      scrapeWayfair(['delta faucet', 'brizo bathroom', 'hansgrohe kitchen', 'moen faucet'], 40),
     ]);
 
     console.log('\n📊 Scraping Summary:');
     console.log(`   Home Depot: ${homeDepotResult.successCount} products, ${homeDepotResult.errorCount} errors`);
     console.log(`   Lowe's: ${lowesResult.successCount} products, ${lowesResult.errorCount} errors`);
-    console.log(`   Total: ${homeDepotResult.successCount + lowesResult.successCount} products\n`);
+    console.log(`   Amazon: ${amazonResult.successCount} products, ${amazonResult.errorCount} errors`);
+    console.log(`   Wayfair: ${wayfairResult.successCount} products, ${wayfairResult.errorCount} errors`);
+    const totalProducts = homeDepotResult.successCount + lowesResult.successCount + amazonResult.successCount + wayfairResult.successCount;
+    console.log(`   Total: ${totalProducts} products\n`);
 
     // Combine results
-    const allProducts = [...homeDepotResult.products, ...lowesResult.products];
+    const allProducts = [
+      ...homeDepotResult.products,
+      ...lowesResult.products,
+      ...amazonResult.products,
+      ...wayfairResult.products,
+    ];
 
     // Save to database
     console.log('💾 Saving to database...');
