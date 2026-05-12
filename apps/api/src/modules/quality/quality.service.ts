@@ -21,15 +21,16 @@ export class QualityService {
     }
 
     // Use new quality engine
+    const specs = (product.specifications || {}) as Record<string, string>;
     const analysis = analyzeQuality({
       price: product.prices[0]?.price || 0,
       brand: product.brand.name,
       warranty: 1, // TODO: Extract from specs
-      materialComposition: product.specifications?.['Material'] || '',
+      materialComposition: specs['Material'] || '',
       certifications: product.certifications,
       collection: product.collection || '',
       productType: product.productType,
-      specifications: product.specifications as Record<string, string>,
+      specifications: specs,
     });
 
     return analysis;
@@ -42,7 +43,7 @@ export class QualityService {
   }> {
     const product = await this.prisma.product.findUnique({
       where: { id: productId },
-      include: { qualityAnalysis: true, prices: { take: 1, orderBy: { timestamp: 'desc' } } },
+      include: { brand: true, qualityAnalysis: true, prices: { take: 1, orderBy: { timestamp: 'desc' } } },
     });
 
     if (!product) {
@@ -125,11 +126,20 @@ export class QualityService {
     const source = await this.getQualityAnalysis(sourceProductId);
     const target = await this.getQualityAnalysis(targetProductId);
 
+    if (!source || !target) {
+      return {
+        source,
+        target,
+        recommendation: 'neutral' as const,
+        qualityDifference: 0,
+      };
+    }
+
     return {
       source,
       target,
-      recommendation: source.qualityScore > target.qualityScore ? 'source' : 'target',
-      qualityDifference: Math.abs(source.qualityScore - target.qualityScore),
+      recommendation: source.scores.overall > target.scores.overall ? 'source' : 'target',
+      qualityDifference: Math.abs(source.scores.overall - target.scores.overall),
     };
   }
 

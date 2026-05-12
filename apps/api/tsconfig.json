@@ -5,7 +5,10 @@
     "target": "ES2020",
     "lib": ["ES2020"],
     "outDir": "./dist",
-    "rootDir": "./src",
+    "baseUrl": ".",
+    "paths": {
+      "@masco/*": ["../../packages/*/src"]
+    },
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -20,6 +23,6 @@
     "emitDecoratorMetadata": true,
     "moduleResolution": "node"
   },
-  "include": ["src"],
+  "include": ["src", "../../packages/*/src"],
   "exclude": ["node_modules", "dist"]
 }

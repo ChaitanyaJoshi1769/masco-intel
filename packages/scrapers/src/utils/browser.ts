@@ -24,7 +24,8 @@ export class BrowserManager {
 
     // Avoid detection
     await page.addInitScript(() => {
-      Object.defineProperty(navigator, 'webdriver', {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      Object.defineProperty((globalThis as any).navigator, 'webdriver', {
         get: () => false,
       });
     });

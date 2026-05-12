@@ -1,11 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
-interface MatchCandidate {
-  productId: string;
-  score: number;
-}
-
 @Injectable()
 export class MatchingService {
   private prisma: PrismaClient;
@@ -61,15 +56,15 @@ export class MatchingService {
 
     if (sku) {
       const normalizedSku = this.normalizeSku(sku);
-      conditions.push({ sku: { contains: normalizedSku, mode: 'insensitive' } });
+      conditions.push({ sku: { contains: normalizedSku, mode: 'insensitive' as any } });
     }
 
     if (mpn) {
-      conditions.push({ mpn: { contains: mpn, mode: 'insensitive' } });
+      conditions.push({ mpn: { contains: mpn, mode: 'insensitive' as any } });
     }
 
     if (upc) {
-      conditions.push({ upc: { contains: upc, mode: 'insensitive' } });
+      conditions.push({ upc: { contains: upc, mode: 'insensitive' as any } });
     }
 
     if (conditions.length === 0) {
@@ -90,7 +85,7 @@ export class MatchingService {
    */
   async matchByTitle(title: string, brand: string, limit = 5) {
     const products = await this.prisma.product.findMany({
-      where: { brand: { name: { contains: brand, mode: 'insensitive' } } },
+      where: { brand: { name: { contains: brand, mode: 'insensitive' as any } } },
       include: {
         brand: true,
         prices: { orderBy: { timestamp: 'desc' }, take: 1 },

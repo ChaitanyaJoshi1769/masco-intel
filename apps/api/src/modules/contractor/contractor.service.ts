@@ -22,6 +22,7 @@ export class ContractorService {
         installDifficulty: 5,
         longevity: 10,
         commonIssues: [],
+        installTimeMinutes: null,
       }
     );
   }
@@ -97,7 +98,7 @@ export class ContractorService {
       score: Math.max(0, Math.min(100, score)),
       reasoning: factors,
       estimatedRepairCost: intel.repairCost,
-      installTimeMinutes: intel.installTimeMinutes,
+      installTimeMinutes: intel.installTimeMinutes || undefined,
       commonIssues: intel.commonIssues,
     };
   }
@@ -107,11 +108,11 @@ export class ContractorService {
       where: {
         brand: { name: { in: brandNames } },
       },
-      include: { contractorIntelligence: true, qualityAnalysis: true },
+      include: { brand: true, contractorIntelligence: true, qualityAnalysis: true },
     });
 
     const byBrand = brandNames.map((brandName) => {
-      const brandProducts = products.filter((p) => p.brand.name === brandName);
+      const brandProducts = products.filter((p) => p.brand?.name === brandName);
       const avgFailureRate =
         brandProducts.reduce((sum, p) => sum + (p.contractorIntelligence?.failureRate || 0.05), 0) /
         (brandProducts.length || 1);
