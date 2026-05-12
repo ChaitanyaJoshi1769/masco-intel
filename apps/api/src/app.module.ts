@@ -10,6 +10,8 @@ import { SavedProductsModule } from './modules/saved-products/saved-products.mod
 import { PriceAlertsModule } from './modules/price-alerts/price-alerts.module';
 import { RecommendationsModule } from './modules/recommendations/recommendations.module';
 import { ComparisonModule } from './modules/comparison/comparison.module';
+import { MarketIntelligenceModule } from './modules/market-intelligence/market-intelligence.module';
+import { ContractorAnalyticsModule } from './modules/contractor-analytics/contractor-analytics.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -23,6 +25,8 @@ import { HealthController } from './health.controller';
     PriceAlertsModule,
     RecommendationsModule,
     ComparisonModule,
+    MarketIntelligenceModule,
+    ContractorAnalyticsModule,
     ProductModule,
     PricingModule,
     MatchingModule,
