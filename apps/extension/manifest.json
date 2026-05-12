@@ -1,0 +1,50 @@
+{
+  "manifest_version": 3,
+  "name": "Masco Intel - Product Intelligence",
+  "description": "Price intelligence, quality analysis, and contractor recommendations for plumbing & home improvement products",
+  "version": "0.1.0",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "webRequest"
+  ],
+  "host_permissions": [
+    "*://www.homedepot.com/*",
+    "*://www.lowes.com/*",
+    "*://www.amazon.com/*",
+    "*://www.wayfair.com/*",
+    "*://www.build.com/*",
+    "*://www.ferguson.com/*",
+    "*://www.faucetdirect.com/*",
+    "*://www.supplyhouse.com/*"
+  ],
+  "background": {
+    "service_worker": "dist/background.js"
+  },
+  "action": {
+    "default_popup": "dist/popup.html",
+    "default_title": "Masco Intel"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://www.homedepot.com/*",
+        "*://www.lowes.com/*",
+        "*://www.amazon.com/*",
+        "*://www.wayfair.com/*",
+        "*://www.build.com/*",
+        "*://www.ferguson.com/*",
+        "*://www.faucetdirect.com/*",
+        "*://www.supplyhouse.com/*"
+      ],
+      "js": ["dist/content.js"],
+      "css": ["dist/content.css"]
+    }
+  ],
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  }
+}

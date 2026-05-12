@@ -1,0 +1,170 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Brand {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  website   String?
+  parent    String?  // Parent company (e.g., Masco)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+
+  @@index([parent])
+}
+
+model Product {
+  id                String   @id @default(cuid())
+  sku               String
+  upc               String?
+  mpn               String?
+  title             String
+  description       String?
+  brandId           String
+  brand             Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  collection        String?
+  productType       String   // 'faucet', 'cartridge', 'valve', etc.
+  finish            String
+  valveType         String?
+  specifications    Json     @default("{}")
+  certifications    String[] @default([])
+  estimatedGrade    String   @default("mid-range") // builder-grade, mid-range, premium, luxury
+  imageUrl          String?
+  imageHash         String?  // For similarity matching
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  prices                PriceHistory[]
+  qualityAnalysis       QualityAnalysis?
+  contractorIntelligence ContractorIntelligence?
+  compatibilitySource   CompatibilityMapping[] @relation("source")
+  compatibilityTarget   CompatibilityMapping[] @relation("target")
+  alternatives          ProductAlternative[]   @relation("source")
+
+  @@unique([sku, brandId])
+  @@index([brandId])
+  @@index([productType])
+  @@index([finish])
+  @@index([estimatedGrade])
+  @@fulltext([title, description])
+}
+
+model ProductAlternative {
+  id                String   @id @default(cuid())
+  sourceProductId   String
+  sourceProduct     Product  @relation("source", fields: [sourceProductId], references: [id], onDelete: Cascade)
+  alternativeProductId String
+  alternativeProduct Product  @relation(fields: [alternativeProductId], references: [id], onDelete: Cascade)
+  reason            String   // why is this an alternative
+  score             Float    @default(0.5) // 0-1 match score
+  createdAt         DateTime @default(now())
+
+  @@unique([sourceProductId, alternativeProductId])
+  @@index([sourceProductId])
+}
+
+model Retailer {
+  id     String @id @default(cuid())
+  name   String @unique
+  domain String
+  logo   String?
+
+  priceHistories PriceHistory[]
+}
+
+model PriceHistory {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  retailerId String
+  retailer  Retailer @relation(fields: [retailerId], references: [id], onDelete: Cascade)
+  price     Float
+  url       String?
+  inStock   Boolean  @default(true)
+  timestamp DateTime @default(now())
+
+  @@index([productId])
+  @@index([retailerId])
+  @@index([timestamp])
+  @@index([productId, timestamp])
+}
+
+model QualityAnalysis {
+  id                    String  @id @default(cuid())
+  productId             String  @unique
+  product               Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  qualityScore          Float   @default(0.5) // 0-1
+  serviceabilityScore   Float   @default(0.5)
+  contractorScore       Float   @default(0.5)
+  longevityScore        Float   @default(0.5)
+  repairabilityScore    Float   @default(0.5)
+  hasPlasticComponents  Boolean @default(false)
+  warrantyYears         Int     @default(1)
+  repairPartsAvailable  Boolean @default(false)
+  estimatedLifespan     Int?    // years
+  commonFailures        String[]
+  reasoning             String? // why these scores
+  updatedAt             DateTime @updatedAt
+}
+
+model ContractorIntelligence {
+  id                   String  @id @default(cuid())
+  productId            String  @unique
+  product              Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  failureRate          Float   @default(0.05) // 0-1
+  repairCost           Float   @default(0)
+  installDifficulty    Int     @default(5) // 1-10
+  longevity            Int     @default(10) // years
+  commonIssues         String[]
+  recommendedAlternative String?
+  installTimeMinutes   Int?
+  updatedAt            DateTime @updatedAt
+}
+
+model CompatibilityMapping {
+  id                  String  @id @default(cuid())
+  sourceProductId     String
+  sourceProduct       Product @relation("source", fields: [sourceProductId], references: [id], onDelete: Cascade)
+  targetProductId     String
+  targetProduct       Product @relation("target", fields: [targetProductId], references: [id], onDelete: Cascade)
+  relationship        String  // replacement-cartridge, replacement-valve, trim-compatible, interchangeable
+  confidence          Float   @default(0.8) // 0-1
+  createdAt           DateTime @default(now())
+
+  @@unique([sourceProductId, targetProductId, relationship])
+  @@index([sourceProductId])
+  @@index([relationship])
+}
+
+model ScraperLog {
+  id        String   @id @default(cuid())
+  retailer  String
+  status    String   // 'success', 'partial', 'failed'
+  itemsProcessed Int
+  errors    String[]
+  startedAt DateTime
+  completedAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([retailer])
+  @@index([createdAt])
+}
+
+model AIEmbedding {
+  id        String   @id @default(cuid())
+  productId String
+  type      String   // 'description', 'image', 'specifications'
+  embedding Float[]  // Vector embedding
+  model     String   // Model used to generate embedding
+  createdAt DateTime @default(now())
+
+  @@unique([productId, type])
+  @@index([productId])
+}
