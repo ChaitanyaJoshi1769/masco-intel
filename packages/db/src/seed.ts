@@ -26,7 +26,7 @@ async function main() {
     },
   });
 
-  const hansgroheBrand = await prisma.brand.upsert({
+  await prisma.brand.upsert({
     where: { name: 'Hansgrohe' },
     update: {},
     create: {

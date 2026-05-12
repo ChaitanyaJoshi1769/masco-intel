@@ -65,7 +65,7 @@ export function detectProductType(title: string, description: string = ''): stri
   return 'plumbing-product';
 }
 
-export function detectCertifications(description: string, specs: Record<string, string>): string[] {
+export function detectCertifications(description: string, specs: Record<string, string> = {}): string[] {
   const combined = (description + ' ' + Object.values(specs).join(' ')).toLowerCase();
   const certs: string[] = [];
 
@@ -77,4 +77,12 @@ export function detectCertifications(description: string, specs: Record<string, 
   if (combined.includes('fips 4694') || combined.includes('4694')) certs.push('FIPS 4694');
 
   return [...new Set(certs)];
+}
+
+export function extractPrice(text: string): number {
+  const match = text.match(/\$?([\d,]+\.?\d*)/);
+  if (match) {
+    return parseFloat(match[1].replace(/,/g, ''));
+  }
+  return 0;
 }

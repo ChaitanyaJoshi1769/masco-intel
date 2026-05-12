@@ -59,7 +59,7 @@ async function main() {
     });
 
     console.log('📈 Products by Brand:');
-    stats.forEach((stat) => {
+    stats.forEach((stat: any) => {
       console.log(`   ${stat.brand}: ${stat._count} products`);
     });
 

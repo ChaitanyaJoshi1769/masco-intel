@@ -16,6 +16,7 @@
   "dependencies": {
     "@masco/db": "workspace:*",
     "@masco/shared": "workspace:*",
+    "@prisma/client": "^5.10.0",
     "axios": "^1.6.0",
     "cheerio": "^1.0.0",
     "playwright": "^1.40.0",

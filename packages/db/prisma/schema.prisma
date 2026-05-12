@@ -47,13 +47,13 @@ model Product {
   compatibilitySource   CompatibilityMapping[] @relation("source")
   compatibilityTarget   CompatibilityMapping[] @relation("target")
   alternatives          ProductAlternative[]   @relation("source")
+  alternativesOf        ProductAlternative[]   @relation("alternative")
 
   @@unique([sku, brandId])
   @@index([brandId])
   @@index([productType])
   @@index([finish])
   @@index([estimatedGrade])
-  @@fulltext([title, description])
 }
 
 model ProductAlternative {
@@ -61,7 +61,7 @@ model ProductAlternative {
   sourceProductId   String
   sourceProduct     Product  @relation("source", fields: [sourceProductId], references: [id], onDelete: Cascade)
   alternativeProductId String
-  alternativeProduct Product  @relation(fields: [alternativeProductId], references: [id], onDelete: Cascade)
+  alternativeProduct Product  @relation("alternative", fields: [alternativeProductId], references: [id], onDelete: Cascade)
   reason            String   // why is this an alternative
   score             Float    @default(0.5) // 0-1 match score
   createdAt         DateTime @default(now())

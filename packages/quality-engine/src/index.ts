@@ -52,16 +52,6 @@ const BUILDER_BRANDS = ['Glacier Bay', 'Delta basic', 'Moen basic', 'Kohler Banc
 
 const PREMIUM_BRANDS = ['Delta', 'Moen', 'Kohler', 'Peerless', 'Newport Brass'];
 
-const LUXURY_COLLECTIONS = ['Solna', 'Brizo Litze', 'Starck', 'Talis', 'Karbon'];
-
-const WARRANTY_YEARS = {
-  lifetime: 100,
-  limited_lifetime: 50,
-  '10': 10,
-  '5': 5,
-  '2': 2,
-  '1': 1,
-};
 
 /**
  * Analyzes product quality based on multiple factors
@@ -71,8 +61,8 @@ export function analyzeQuality(factors: QualityFactors): QualityAnalysis {
   const overall = calculateOverallScore(scores);
   const grade = determineGrade(overall, factors);
   const confidence = calculateConfidence(factors);
-  const reasoning = generateReasoning(factors, scores);
-  const lifespan = estimateLifespan(factors, scores);
+  const reasoning = generateReasoning(scores);
+  const lifespan = estimateLifespan(factors);
   const maintenance = estimateMaintenanceCost(factors);
 
   return {
@@ -80,7 +70,7 @@ export function analyzeQuality(factors: QualityFactors): QualityAnalysis {
     scores,
     confidence,
     reasoning,
-    recommendations: generateRecommendations(grade, factors),
+    recommendations: generateRecommendations(grade),
     estimated_lifespan: lifespan,
     maintenance_cost: maintenance,
   };
@@ -271,7 +261,7 @@ function calculateConfidence(factors: QualityFactors): number {
   return Math.min(confidence, 1);
 }
 
-function estimateLifespan(factors: QualityFactors, scores: QualityScore): number {
+function estimateLifespan(factors: QualityFactors): number {
   let years = 10; // Base estimate
 
   // Material quality adds years
@@ -296,7 +286,7 @@ function estimateMaintenanceCost(factors: QualityFactors): string {
   return 'high'; // Budget items fail more often
 }
 
-function generateReasoning(factors: QualityFactors, scores: QualityScore): string[] {
+function generateReasoning(scores: QualityScore): string[] {
   const reasons: string[] = [];
 
   if (scores.durability < 50) {
@@ -318,10 +308,7 @@ function generateReasoning(factors: QualityFactors, scores: QualityScore): strin
   return reasons;
 }
 
-function generateRecommendations(
-  grade: string,
-  factors: QualityFactors
-): string[] {
+function generateRecommendations(grade: string): string[] {
   const recommendations: string[] = [];
 
   switch (grade) {
