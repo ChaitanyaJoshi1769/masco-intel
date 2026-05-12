@@ -5,6 +5,9 @@ import { PricingModule } from './modules/pricing/pricing.module';
 import { MatchingModule } from './modules/matching/matching.module';
 import { QualityModule } from './modules/quality/quality.module';
 import { ContractorModule } from './modules/contractor/contractor.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { SavedProductsModule } from './modules/saved-products/saved-products.module';
+import { PriceAlertsModule } from './modules/price-alerts/price-alerts.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -13,6 +16,9 @@ import { HealthController } from './health.controller';
       isGlobal: true,
       envFilePath: ['.env.local', '.env'],
     }),
+    AuthModule,
+    SavedProductsModule,
+    PriceAlertsModule,
     ProductModule,
     PricingModule,
     MatchingModule,
