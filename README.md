@@ -25,30 +25,55 @@ Visit Home Depot, Lowe's, Amazon, or any supported retailer. The Masco Intel Chr
 
 ## ✨ Key Features
 
-✅ **Real-Time Price Tracking** - Monitor 4 major retailers with historical data  
+**Phase 1: User Experience** ✅
+✅ **User Accounts** - Registration, login, JWT authentication  
+✅ **Saved Products** - Save favorites with personal notes  
+✅ **Price Alerts** - Automatic notifications when prices drop  
+
+**Phase 2: Intelligence & Insights** 🚀
+✅ **Product Recommendations** - Similar products, better value alternatives, compatible items  
+✅ **Product Comparison** - Side-by-side analysis with quality scores and value metrics  
 ✅ **AI Quality Analysis** - Automatic builder-grade detection with confidence scoring  
 ✅ **Contractor Intelligence** - Suitability scoring and supply chain analysis  
-✅ **Chrome Extension** - Real-time detection on 8+ retailers  
-✅ **Analytics Dashboard** - 5 interactive visualizations with Recharts  
+✅ **Product Matching** - SKU/MPN/UPC matching with fuzzy logic  
+
+**Core Features**
+✅ **Real-Time Price Tracking** - Monitor 8+ retailers with historical data  
+✅ **Chrome Extension** - Real-time detection on retailers  
+✅ **Analytics Dashboard** - 5 interactive visualizations  
 ✅ **Web Scrapers** - 4 retailers, ~160+ products, fully automated  
 ✅ **Security Hardened** - Rate limiting, helmet headers, input validation  
 ✅ **Production Ready** - Docker, Railway, and traditional hosting support
 
-## 📋 Status: Production Ready ✅
+## 📋 Status: Phase 2 Core Complete 🚀
 
-- ✅ Full TypeScript codebase
-- ✅ All 5 core modules implemented (Product, Pricing, Quality, Matching, Contractor)
-- ✅ Database schema with Prisma migrations
+**Phase 1: User Experience** ✅ Complete
+- ✅ User registration & JWT authentication (bcrypt hashing)
+- ✅ Saved products with notes & management
+- ✅ Price drop alerts with automatic triggering
+- ✅ 10 new API endpoints
+
+**Phase 2: Intelligence & Insights** 🟡 Core Complete (v1.2.0)
+- ✅ Product Recommendations Engine (similar, better-value, compatible)
+- ✅ Product Comparison Tool (specs matrix, quality scores, value analysis)
+- ✅ Quality Analysis Engine (durability, repairability, materials, warranty)
+- ✅ Product Matching Service (SKU/MPN/UPC matching with fuzzy logic)
+- ✅ Contractor Intelligence (failure rates, repair costs, installation difficulty)
+- ✅ 9 new API endpoints for intelligence features
+- 🟡 Market Intelligence, Reports & Export, Price Prediction (coming)
+
+**Core Components**
+- ✅ Full TypeScript codebase with strict mode
+- ✅ 7 service modules (Auth, Products, Recommendations, Comparison, Quality, Matching, Contractor)
+- ✅ PostgreSQL database with Prisma ORM & migrations
 - ✅ API with security hardening (helmet, rate limiting, validation)
-- ✅ React dashboard with 5 visualization components
-- ✅ Chrome extension with 8 retailer support
+- ✅ React dashboard with visualizations
+- ✅ Chrome extension with 8+ retailer support
 - ✅ 4 automated web scrapers
-- ✅ AI quality analysis engine
-- ✅ Docker containerization
-- ✅ Comprehensive deployment guides
-- ✅ Complete documentation
+- ✅ Docker containerization & deployment guides
+- ✅ Comprehensive documentation
 
-**See [PROJECT_STATUS.md](PROJECT_STATUS.md) for detailed feature list.**
+**See [PHASE2_COMPLETION.md](PHASE2_COMPLETION.md) for Phase 2 details, [PROGRESS.md](PROGRESS.md) for full roadmap.**
 
 ## 🚀 Deploy in 5 Minutes
 
@@ -255,41 +280,63 @@ masco-intel/
 
 ## 🎮 API Endpoints
 
-### Products
+### Authentication (Phase 1)
 ```bash
-GET  /api/products/search?q=delta%20faucet
-GET  /api/products/sku/{sku}
-GET  /api/products/mpn/{mpn}
-GET  /api/products/{id}/alternatives
-POST /api/products
+POST /auth/register                    # Create user account
+POST /auth/login                       # Get JWT token
+GET  /auth/me                          # Get current user profile
 ```
 
-### Pricing
+### Saved Products (Phase 1)
 ```bash
-GET /api/pricing/{productId}/history
-GET /api/pricing/{productId}/comparison
-GET /api/pricing/{productId}/markup?msrp=150
+POST   /saved-products                 # Save a product
+GET    /saved-products                 # List user's saved products
+PATCH  /saved-products/:productId      # Update product notes
+DELETE /saved-products/:productId      # Remove saved product
 ```
 
-### Quality & Grading
+### Price Alerts (Phase 1)
 ```bash
-GET /api/quality/{productId}
-GET /api/quality/{productId}/grade-detection
-GET /api/quality/compare?source={id1}&target={id2}
+POST   /price-alerts                   # Create price alert
+GET    /price-alerts                   # List user alerts
+DELETE /price-alerts/:alertId          # Delete alert
+PATCH  /price-alerts/:alertId/reset    # Reset triggered alert
 ```
 
-### Matching
+### Recommendations (Phase 2) 🆕
 ```bash
-GET /api/matching/by-identifier?sku={sku}&mpn={mpn}
-GET /api/matching/by-title?title={title}&brand={brand}
-GET /api/matching/compatible?productId={id}
+GET /recommendations/similar/:productId      # Similar products
+GET /recommendations/better-value/:productId # Better alternatives
+GET /recommendations/compatible/:productId   # Compatible products
+GET /recommendations/personalized            # User recommendations (auth required)
+GET /recommendations/by-price                # Price-range discovery
 ```
 
-### Contractor Intelligence
+### Comparison (Phase 2) 🆕
 ```bash
-GET /api/contractor/{productId}/intelligence
-GET /api/contractor/{productId}/recommendations
-GET /api/contractor/brands/comparison?brands=Delta,Brizo,Hansgrohe
+GET /comparison?source=id1&target=id2        # Compare two products
+GET /comparison/multiple?ids=id1,id2,id3     # Compare multiple
+GET /comparison/category?productType=faucet  # Category comparison
+```
+
+### Matching (Phase 2) 🆕
+```bash
+GET /matching/by-identifier?sku={sku}&mpn={mpn}  # SKU/MPN/UPC matching
+GET /matching/by-title?title={title}&brand={brand} # Title similarity
+```
+
+### Quality & Grading (Phase 2) 🆕
+```bash
+GET /quality/{productId}               # Quality analysis
+GET /quality/{productId}/grade-detection # Builder-grade detection
+GET /quality/compare?source={id1}&target={id2} # Quality comparison
+```
+
+### Contractor Intelligence (Phase 2) 🆕
+```bash
+GET /contractor/{productId}/intelligence    # Product intelligence
+GET /contractor/{productId}/recommendations # Recommendations
+GET /contractor/brands/comparison           # Brand comparison
 ```
 
 ## 🏗️ Building the Extension
