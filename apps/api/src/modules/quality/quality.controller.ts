@@ -17,10 +17,23 @@ export class QualityController {
 
   @Get(':productId/grade-detection')
   async detectGrade(@Param('productId') productId: string) {
-    const detection = await this.qualityService.detectBuilderGrade(productId);
+    const analysis = await this.qualityService.getQualityAnalysis(productId);
+    if (!analysis) {
+      return {
+        success: false,
+        error: 'Product not found',
+        timestamp: new Date().toISOString(),
+      };
+    }
     return {
       success: true,
-      data: detection,
+      data: {
+        grade: analysis.grade,
+        confidence: analysis.confidence,
+        scores: analysis.scores,
+        reasoning: analysis.reasoning,
+        estimated_lifespan: analysis.estimated_lifespan,
+      },
       timestamp: new Date().toISOString(),
     };
   }

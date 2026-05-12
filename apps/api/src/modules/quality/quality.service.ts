@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
+import { analyzeQuality } from '@masco/quality-engine';
 
 @Injectable()
 export class QualityService {
@@ -10,23 +11,28 @@ export class QualityService {
   }
 
   async getQualityAnalysis(productId: string) {
-    const analysis = await this.prisma.qualityAnalysis.findUnique({
-      where: { productId },
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+      include: { brand: true, prices: { take: 1, orderBy: { timestamp: 'desc' } } },
     });
 
-    return (
-      analysis || {
-        productId,
-        qualityScore: 0.5,
-        serviceabilityScore: 0.5,
-        contractorScore: 0.5,
-        longevityScore: 0.5,
-        repairabilityScore: 0.5,
-        hasPlasticComponents: false,
-        warrantyYears: 1,
-        repairPartsAvailable: false,
-      }
-    );
+    if (!product) {
+      return null;
+    }
+
+    // Use new quality engine
+    const analysis = analyzeQuality({
+      price: product.prices[0]?.price || 0,
+      brand: product.brand.name,
+      warranty: 1, // TODO: Extract from specs
+      materialComposition: product.specifications?.['Material'] || '',
+      certifications: product.certifications,
+      collection: product.collection || '',
+      productType: product.productType,
+      specifications: product.specifications as Record<string, string>,
+    });
+
+    return analysis;
   }
 
   async detectBuilderGrade(productId: string): Promise<{
