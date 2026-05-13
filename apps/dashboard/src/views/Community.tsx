@@ -7,6 +7,11 @@ import {
   Chip,
   PageLayout,
 } from '@/components';
+import { useForm } from '@/hooks';
+import { useAPIMutation } from '@/hooks';
+import { useToast } from '@/hooks';
+import { CommonValidation } from '@/utils/form';
+import { communityAPI } from '@/services/api';
 
 interface NavItem {
   id: string;
@@ -54,7 +59,40 @@ export const Community: React.FC = () => {
   const [activeNav, setActiveNav] = useState('forum');
   const [selectedThread, setSelectedThread] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [replyText, setReplyText] = useState('');
+  const { addToast } = useToast();
+
+  const { execute: postReply, loading: isSubmittingReply } = useAPIMutation(
+    (data: { content: string }) =>
+      communityAPI.postReply(selectedThread || '', data.content)
+  );
+
+  const replyForm = useForm({
+    initialValues: { content: '' },
+    validationSchema: {
+      content: [
+        CommonValidation.required('Please enter a reply'),
+        CommonValidation.minLength(10, 'Reply must be at least 10 characters'),
+        CommonValidation.maxLength(5000, 'Reply cannot exceed 5000 characters'),
+      ],
+    },
+    onSubmit: async (values) => {
+      try {
+        await postReply(values);
+        replyForm.resetForm();
+        addToast({
+          type: 'success',
+          message: 'Reply posted successfully',
+          duration: 3000,
+        });
+      } catch (error) {
+        addToast({
+          type: 'error',
+          message: error instanceof Error ? error.message : 'Failed to post reply',
+          duration: 4000,
+        });
+      }
+    },
+  });
 
   const [categories] = useState<Category[]>([
     {
@@ -354,21 +392,65 @@ export const Community: React.FC = () => {
                 <h3 className="text-base font-semibold">Add Your Reply</h3>
               </CardHeader>
               <CardBody className="space-y-3">
+                {replyForm.errors.content && (
+                  <div
+                    className="p-3 rounded-lg border border-bad text-sm text-bad"
+                    style={{
+                      backgroundColor: 'var(--bg-2)',
+                      borderColor: 'var(--bad)',
+                    }}
+                  >
+                    {replyForm.errors.content}
+                  </div>
+                )}
                 <textarea
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
+                  {...replyForm.getFieldProps('content')}
+                  onBlur={(e) => {
+                    replyForm.handleBlur(e);
+                  }}
                   placeholder="Share your experience or ask a follow-up question..."
                   className="w-full p-3 rounded-lg border border-line-2 text-sm"
                   style={{
                     backgroundColor: 'var(--bg-2)',
                     color: 'var(--ink-0)',
+                    borderColor: replyForm.errors.content
+                      ? 'var(--bad)'
+                      : 'var(--line-2)',
                   }}
                   rows={4}
+                  disabled={isSubmittingReply}
                 />
-                <div className="flex gap-3">
-                  <Button variant="primary">Post Reply</Button>
-                  <Button variant="default">Preview</Button>
+                <div className="text-xs text-ink-3">
+                  {(replyForm.values.content || '').length}/5000 characters
                 </div>
+                <div className="flex gap-3">
+                  <Button
+                    variant="primary"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      replyForm.handleSubmit(
+                        e as any as React.FormEvent<HTMLFormElement>
+                      );
+                    }}
+                    disabled={isSubmittingReply}
+                  >
+                    {isSubmittingReply ? 'Posting...' : 'Post Reply'}
+                  </Button>
+                  <Button variant="default" disabled={isSubmittingReply}>
+                    Preview
+                  </Button>
+                </div>
+                {replyForm.submitError && (
+                  <div
+                    className="p-3 rounded-lg border border-bad text-sm text-bad"
+                    style={{
+                      backgroundColor: 'var(--bg-2)',
+                      borderColor: 'var(--bad)',
+                    }}
+                  >
+                    {replyForm.submitError.message}
+                  </div>
+                )}
               </CardBody>
             </Card>
           </>
