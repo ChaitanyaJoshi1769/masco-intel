@@ -11,6 +11,8 @@ import { DataSyncService } from './data-sync.service';
 import { DataSyncController } from './data-sync.controller';
 import { PermissionService } from './permission.service';
 import { PermissionController } from './permission.controller';
+import { AuditService } from './audit.service';
+import { AuditController } from './audit.controller';
 
 @Module({
   controllers: [
@@ -20,6 +22,7 @@ import { PermissionController } from './permission.controller';
     WebhookSignatureController,
     DataSyncController,
     PermissionController,
+    AuditController,
   ],
   providers: [
     IntegrationsService,
@@ -28,6 +31,7 @@ import { PermissionController } from './permission.controller';
     WebhookSignatureService,
     DataSyncService,
     PermissionService,
+    AuditService,
   ],
   exports: [
     IntegrationsService,
@@ -36,6 +40,7 @@ import { PermissionController } from './permission.controller';
     WebhookSignatureService,
     DataSyncService,
     PermissionService,
+    AuditService,
   ],
 })
 export class IntegrationsModule {}
