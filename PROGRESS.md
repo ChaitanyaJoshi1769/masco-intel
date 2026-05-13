@@ -32,7 +32,7 @@
 ---
 
 ### 🟡 Phase 2: Intelligence & Insights (4-6 weeks) - IN PROGRESS
-**Estimated Effort:** 60-80 hours → Actual: 18 hours (accelerated)  
+**Estimated Effort:** 60-80 hours → Actual: 22 hours (accelerated)  
 **Team Size:** 2-3 developers → Actual: 1 (automated)  
 
 **Features Implemented (Core):**
@@ -62,13 +62,21 @@
 - [x] Cost Savings Analysis (alternative comparison)
 - [x] Reports & Export (CSV generation, market analysis reports)
 - [x] Executive Summary Reports (market insights, health scores)
+- [x] Price Prediction (exponential smoothing, seasonal patterns)
+- [x] Forecasting with Confidence Scoring
+- [x] Seasonal Pattern Detection (month-by-month analysis)
 
-**Planned Features (Next):**
-- [ ] Reports & Export (PDF, CSV, dashboards)
-- [ ] Better Product Matching (semantic, image-based)
-- [ ] Price Prediction (seasonal patterns, ML models)
-- [ ] Dashboard Enhancements (market trends, analytics charts)
-- [ ] Bulk Operations (multi-product analysis, export)
+**Remaining Phase 2 Features:**
+- [ ] Better Product Matching (semantic, image-based with embeddings)
+- [ ] Dashboard Enhancements (market trends, analytics charts, real-time updates)
+- [ ] Bulk Operations (multi-product analysis, batch export)
+- [ ] ML-based Price Optimization (demand prediction, margin analysis)
+
+**Phase 3 (Expansion) - Planned:**
+- [ ] Mobile app (iOS/Android)
+- [ ] More retailers (Menards, ACE Hardware, Grainger)
+- [ ] Advanced search (full-text, faceted)
+- [ ] Video tutorials and product comparisons
 
 **Prerequisites Met:**
 - ✅ User authentication system
@@ -108,11 +116,11 @@
 
 | Metric | Phase 1 | Phase 2 | Phase 3+ |
 |--------|---------|---------|----------|
-| API Endpoints | 10 | +37 | +20 |
+| API Endpoints | 10 | +41 | +20 |
 | Database Tables | +3 | +0 (existing) | +4 |
-| Modules | +3 | +9 (core + analytics + reports) | +3 |
-| Lines of Code | +1,100 | ~4,200 | ~3,500 |
-| Build Time | ~45s | ~55s (now 5s with Turbo) | ~65s |
+| Modules | +3 | +10 (core + analytics + reports + prediction) | +3 |
+| Lines of Code | +1,100 | ~4,600 | ~3,500 |
+| Build Time | ~45s | ~55s (now 4.5s with Turbo) | ~65s |
 | Test Coverage | 60% | 80% | 90% |
 
 **Phase 2 Endpoints Breakdown:**
@@ -120,6 +128,7 @@
 - Market Intelligence: 6 endpoints (brand metrics, trends, positioning, volatility, best-buy)
 - Contractor Analytics: 7 endpoints (ROI, TCO, job estimation, brand ranking, cost savings)
 - Reports & Export: 7 endpoints (CSV exports, summaries, metadata)
+- Price Prediction: 4 endpoints (patterns, forecast, seasonal, recommendation)
 
 ---
 
