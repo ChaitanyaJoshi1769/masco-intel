@@ -7,6 +7,8 @@ import {
   Chip,
   PageLayout,
 } from '@/components';
+import { useAPI, useAPIMutation, useToast } from '@/hooks';
+import { chatbotAPI } from '@/services/api';
 
 interface NavItem {
   id: string;
@@ -43,18 +45,61 @@ interface ToolCall {
 }
 
 export const AIConsole: React.FC = () => {
+  const { showToast } = useToast();
   const [activeNav, setActiveNav] = useState('dashboard');
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       role: 'assistant',
       content: 'Welcome to Masco Intel AI Console. I can help you with product searches, price comparisons, market analysis, and more. Try asking me something like "Find the best faucets under $200" or "Compare Kohler vs Delta pricing".',
-      timestamp: '2026-05-13 10:00 AM',
+      timestamp: new Date().toLocaleString(),
     },
   ]);
   const [inputValue, setInputValue] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Initialize conversation
+  const { mutate: createConversation, loading: creatingConversation } = useAPIMutation(
+    () => chatbotAPI.createConversation(),
+    {
+      onSuccess: (data: any) => {
+        setConversationId(data.id);
+      },
+      onError: () => {
+        showToast('Failed to initialize conversation', 'error');
+      },
+    }
+  );
+
+  // Send message mutation
+  const { mutate: sendMessage, loading: sendingMessage } = useAPIMutation(
+    (content: string) => conversationId ? chatbotAPI.sendMessage(conversationId, content) : Promise.reject('No conversation'),
+    {
+      onSuccess: (data: any) => {
+        if (data.content) {
+          const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: data.content,
+            timestamp: new Date().toLocaleString(),
+            toolCalls: data.toolCalls,
+          };
+          setMessages((prev) => [...prev, assistantMessage]);
+        }
+      },
+      onError: () => {
+        showToast('Failed to send message', 'error');
+      },
+    }
+  );
+
+  // Initialize conversation on mount
+  useEffect(() => {
+    if (!conversationId && !creatingConversation) {
+      createConversation();
+    }
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -98,7 +143,7 @@ export const AIConsole: React.FC = () => {
   ];
 
   const handleSendMessage = () => {
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || !conversationId || sendingMessage) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -108,31 +153,10 @@ export const AIConsole: React.FC = () => {
     };
 
     setMessages([...messages, userMessage]);
+    const messageContent = inputValue;
     setInputValue('');
-    setIsLoading(true);
 
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: `I'm analyzing your request: "${inputValue}". In a real implementation, this would connect to the backend AI service with streaming responses, tool calls, and citations. For now, I'm showing you the UI structure.`,
-        timestamp: new Date().toLocaleString(),
-        toolCalls: [
-          {
-            name: 'pricing-scan',
-            args: { product: inputValue, retailers: ['Home Depot', 'Lowes', 'Ferguson'] },
-            result: {
-              products: [
-                { sku: '9159-AR-DST', name: 'Trinsic Single-Handle', price: 185.99, retailer: 'Home Depot' },
-              ],
-            },
-          },
-        ],
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
-      setIsLoading(false);
-    }, 1500);
+    sendMessage(messageContent);
   };
 
   const handleToolClick = (toolName: string) => {
@@ -243,7 +267,7 @@ export const AIConsole: React.FC = () => {
               </div>
             ))}
 
-            {isLoading && (
+            {sendingMessage && (
               <div className="flex justify-start">
                 <div
                   className="rounded-lg p-4"
@@ -279,14 +303,14 @@ export const AIConsole: React.FC = () => {
                   backgroundColor: 'var(--bg-2)',
                   color: 'var(--ink-0)',
                 }}
-                disabled={isLoading}
+                disabled={sendingMessage || !conversationId}
               />
               <Button
                 variant="accent"
                 onClick={handleSendMessage}
-                disabled={!inputValue.trim() || isLoading}
+                disabled={!inputValue.trim() || sendingMessage || !conversationId}
               >
-                Send
+                {sendingMessage ? 'Sending...' : 'Send'}
               </Button>
             </div>
 
