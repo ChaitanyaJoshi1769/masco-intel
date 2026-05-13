@@ -20,6 +20,7 @@ import { SearchModule } from './modules/search/search.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { RetailersModule } from './modules/retailers/retailers.module';
 import { RealtimeModule } from './modules/realtime/realtime.module';
+import { ContentModule } from './modules/content/content.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -43,6 +44,7 @@ import { HealthController } from './health.controller';
     NotificationsModule,
     RetailersModule,
     RealtimeModule,
+    ContentModule,
     ProductModule,
     PricingModule,
     MatchingModule,
