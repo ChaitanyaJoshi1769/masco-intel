@@ -1,11 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
+import { SemanticMatcherService } from './semantic-matcher.service';
+import { ImageMatcherService } from './image-matcher.service';
 
 @Injectable()
 export class MatchingService {
   private prisma: PrismaClient;
 
-  constructor() {
+  constructor(
+    private semanticMatcher: SemanticMatcherService,
+    private imageMatcher: ImageMatcherService,
+  ) {
     this.prisma = new PrismaClient();
   }
 
@@ -111,6 +116,62 @@ export class MatchingService {
       where: { sourceProductId: productId },
       include: { targetProduct: { include: { brand: true } } },
     });
+  }
+
+  /**
+   * Calculate semantic similarity between two products
+   */
+  async calculateSemanticSimilarity(productId1: string, productId2: string) {
+    return this.semanticMatcher.calculateSemanticSimilarity(productId1, productId2);
+  }
+
+  /**
+   * Find semantic duplicates for a product
+   */
+  async findSemanticDuplicates(productId: string, threshold = 0.75, limit = 10) {
+    return this.semanticMatcher.findSemanticDuplicates(productId, threshold, limit);
+  }
+
+  /**
+   * Validate a match between two products
+   */
+  async validateMatch(productId1: string, productId2: string, isMatch: boolean) {
+    return this.semanticMatcher.validateMatch(productId1, productId2, isMatch);
+  }
+
+  /**
+   * Find cross-retailer matches
+   */
+  async findCrossRetailerMatches(productId: string, limit = 5) {
+    return this.semanticMatcher.findCrossRetailerMatches(productId, limit);
+  }
+
+  /**
+   * Calculate image similarity between two products
+   */
+  async calculateImageSimilarity(productId1: string, productId2: string) {
+    return this.imageMatcher.calculateImageSimilarity(productId1, productId2);
+  }
+
+  /**
+   * Find visually similar products
+   */
+  async findVisuallySimilarProducts(productId: string, threshold = 0.7, limit = 10) {
+    return this.imageMatcher.findVisuallySimilarProducts(productId, threshold, limit);
+  }
+
+  /**
+   * Find products by image URL
+   */
+  async findByImageUrl(imageUrl: string, threshold = 0.6, limit = 10) {
+    return this.imageMatcher.findByImageUrl(imageUrl, threshold, limit);
+  }
+
+  /**
+   * Find duplicate images in database
+   */
+  async findDuplicateImages(limit = 100) {
+    return this.imageMatcher.findDuplicateImages(limit);
   }
 
   async onModuleDestroy() {
