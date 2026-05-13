@@ -16,6 +16,8 @@ import { ReportsModule } from './modules/reports/reports.module';
 import { PricePredictionModule } from './modules/price-prediction/price-prediction.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { BulkOperationsModule } from './modules/bulk-operations/bulk-operations.module';
+import { SearchModule } from './modules/search/search.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -35,6 +37,8 @@ import { HealthController } from './health.controller';
     PricePredictionModule,
     DashboardModule,
     BulkOperationsModule,
+    SearchModule,
+    NotificationsModule,
     ProductModule,
     PricingModule,
     MatchingModule,
