@@ -22,6 +22,7 @@ import { RetailersModule } from './modules/retailers/retailers.module';
 import { RealtimeModule } from './modules/realtime/realtime.module';
 import { ContentModule } from './modules/content/content.module';
 import { PriceOptimizationModule } from './modules/price-optimization/price-optimization.module';
+import { IntegrationsModule } from './modules/integrations/integrations.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -47,6 +48,7 @@ import { HealthController } from './health.controller';
     RealtimeModule,
     ContentModule,
     PriceOptimizationModule,
+    IntegrationsModule,
     ProductModule,
     PricingModule,
     MatchingModule,
