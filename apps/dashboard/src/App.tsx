@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Login, Dashboard, ProductTerminal, Marketplace, Community, Billing, Analytics, AIConsole, Settings } from './views';
 import { useAuth } from './hooks';
+import { ErrorBoundary } from './components';
 
 type PageType = 'dashboard' | 'terminal' | 'marketplace' | 'forum' | 'billing' | 'analytics' | 'ai' | 'settings';
 
@@ -44,27 +45,37 @@ export const App: React.FC = () => {
 
   // Show login if not authenticated
   if (!isAuthenticated) {
-    return <Login onLoginSuccess={handleLoginSuccess} />;
+    return (
+      <ErrorBoundary>
+        <Login onLoginSuccess={handleLoginSuccess} />
+      </ErrorBoundary>
+    );
   }
 
-  switch (currentPage) {
-    case 'terminal':
-      return <ProductTerminal />;
-    case 'marketplace':
-      return <Marketplace />;
-    case 'forum':
-      return <Community />;
-    case 'billing':
-      return <Billing />;
-    case 'analytics':
-      return <Analytics />;
-    case 'ai':
-      return <AIConsole />;
-    case 'settings':
-      return <Settings />;
-    default:
-      return <Dashboard />;
-  }
+  return (
+    <ErrorBoundary>
+      {(() => {
+        switch (currentPage) {
+          case 'terminal':
+            return <ProductTerminal />;
+          case 'marketplace':
+            return <Marketplace />;
+          case 'forum':
+            return <Community />;
+          case 'billing':
+            return <Billing />;
+          case 'analytics':
+            return <Analytics />;
+          case 'ai':
+            return <AIConsole />;
+          case 'settings':
+            return <Settings />;
+          default:
+            return <Dashboard />;
+        }
+      })()}
+    </ErrorBoundary>
+  );
 };
 
 export default App;
