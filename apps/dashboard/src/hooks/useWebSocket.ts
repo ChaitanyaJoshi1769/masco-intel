@@ -98,6 +98,26 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
     emit('mark-read', { conversationId, messageIds });
   }, [emit]);
 
+  // Subscribe to notifications
+  const subscribeNotifications = useCallback((userId: string) => {
+    emit('subscribe-notifications', { userId });
+  }, [emit]);
+
+  // Unsubscribe from notifications
+  const unsubscribeNotifications = useCallback((userId: string) => {
+    emit('unsubscribe-notifications', { userId });
+  }, [emit]);
+
+  // Mark notification as read
+  const markNotificationRead = useCallback((userId: string, notificationId: string) => {
+    emit('mark-notification-read', { userId, notificationId });
+  }, [emit]);
+
+  // Clear all notifications
+  const clearNotifications = useCallback((userId: string) => {
+    emit('clear-notifications', { userId });
+  }, [emit]);
+
   return {
     socket: socketRef.current,
     connected,
@@ -110,5 +130,9 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
     sendMessage,
     setTyping,
     markMessagesRead,
+    subscribeNotifications,
+    unsubscribeNotifications,
+    markNotificationRead,
+    clearNotifications,
   };
 };
