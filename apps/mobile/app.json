@@ -1,0 +1,23 @@
+{
+  "name": "MascoIntel",
+  "displayName": "Masco Intel",
+  "version": "1.0.0",
+  "description": "Intelligent building materials marketplace for contractors and professionals",
+  "react-native": {
+    "version": "0.73.0"
+  },
+  "ios": {
+    "supportsTablet": true
+  },
+  "android": {
+    "adaptiveIcon": {
+      "foregroundImage": "./android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
+      "backgroundColor": "#FFFFFF"
+    }
+  },
+  "plugins": [
+    [
+      "react-native-gesture-handler"
+    ]
+  ]
+}
