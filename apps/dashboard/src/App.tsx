@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Dashboard, ProductTerminal, Marketplace, Community, Billing, Analytics } from './views';
+import { Dashboard, ProductTerminal, Marketplace, Community, Billing, Analytics, AIConsole, Settings } from './views';
 
-type PageType = 'dashboard' | 'terminal' | 'marketplace' | 'forum' | 'billing' | 'analytics';
+type PageType = 'dashboard' | 'terminal' | 'marketplace' | 'forum' | 'billing' | 'analytics' | 'ai' | 'settings';
 
 export const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<PageType>('dashboard');
@@ -26,6 +26,12 @@ export const App: React.FC = () => {
       case 'analytics':
         setCurrentPage('analytics');
         break;
+      case 'ai':
+        setCurrentPage('ai');
+        break;
+      case 'settings':
+        setCurrentPage('settings');
+        break;
     }
     window.scrollTo(0, 0);
   };
@@ -41,6 +47,10 @@ export const App: React.FC = () => {
       return <Billing />;
     case 'analytics':
       return <Analytics />;
+    case 'ai':
+      return <AIConsole />;
+    case 'settings':
+      return <Settings />;
     default:
       return <Dashboard />;
   }

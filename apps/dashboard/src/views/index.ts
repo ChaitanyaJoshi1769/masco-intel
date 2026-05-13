@@ -5,3 +5,5 @@ export { Marketplace } from './Marketplace';
 export { Community } from './Community';
 export { Billing } from './Billing';
 export { Analytics } from './Analytics';
+export { AIConsole } from './AIConsole';
+export { Settings } from './Settings';
