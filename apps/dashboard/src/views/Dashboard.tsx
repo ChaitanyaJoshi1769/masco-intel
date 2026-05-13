@@ -8,9 +8,8 @@ import {
   KPI,
   PageLayout,
   Sparkline,
+  NotificationCenter,
 } from '@/components';
-import { useAPI } from '@/hooks';
-import { dashboardAPI } from '@/services/api';
 
 interface NavItem {
   id: string;
@@ -64,6 +63,7 @@ interface CategoryMetric {
 
 export const Dashboard: React.FC = () => {
   const [activeNav, setActiveNav] = useState('dashboard');
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const defaultMetrics: DashboardMetrics = {
     totalOrders: 2847,
@@ -202,6 +202,13 @@ export const Dashboard: React.FC = () => {
         </div>
       }
     >
+      {/* Notification Center */}
+      <NotificationCenter
+        userId="current-user"
+        visible={showNotifications}
+        onClose={() => setShowNotifications(false)}
+      />
+
       {/* Dashboard Content */}
       <div className="p-6 space-y-6">
         {/* KPI Grid */}

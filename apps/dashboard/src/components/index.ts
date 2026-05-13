@@ -15,3 +15,4 @@ export { Error } from './Error';
 export { Modal } from './Modal';
 export { Toast } from './Toast';
 export { ToastContainer } from './ToastContainer';
+export { NotificationCenter } from './NotificationCenter';
