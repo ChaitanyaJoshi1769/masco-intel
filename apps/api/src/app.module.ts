@@ -12,6 +12,7 @@ import { RecommendationsModule } from './modules/recommendations/recommendations
 import { ComparisonModule } from './modules/comparison/comparison.module';
 import { MarketIntelligenceModule } from './modules/market-intelligence/market-intelligence.module';
 import { ContractorAnalyticsModule } from './modules/contractor-analytics/contractor-analytics.module';
+import { ReportsModule } from './modules/reports/reports.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -27,6 +28,7 @@ import { HealthController } from './health.controller';
     ComparisonModule,
     MarketIntelligenceModule,
     ContractorAnalyticsModule,
+    ReportsModule,
     ProductModule,
     PricingModule,
     MatchingModule,
