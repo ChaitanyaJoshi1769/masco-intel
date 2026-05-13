@@ -6,7 +6,14 @@ import {
   CardHeader,
   Chip,
   PageLayout,
+  Modal,
 } from '@/components';
+import { useAPIMutation } from '@/hooks';
+import { useToast } from '@/hooks';
+import { useModal } from '@/hooks';
+import { useForm } from '@/hooks';
+import { CommonValidation } from '@/utils/form';
+import { marketplaceAPI } from '@/services/api';
 
 interface NavItem {
   id: string;
@@ -57,6 +64,87 @@ interface Order {
 export const Marketplace: React.FC = () => {
   const [activeNav, setActiveNav] = useState('marketplace');
   const [viewMode, setViewMode] = useState<'home' | 'contractors' | 'orders'>('home');
+  const [selectedContractor, setSelectedContractor] = useState<Contractor | null>(null);
+  const { isOpen: isMessageOpen, open: openMessage, close: closeMessage } = useModal();
+  const { isOpen: isHireOpen, open: openHire, close: closeHire } = useModal();
+  const { addToast } = useToast();
+
+  const { execute: sendMessage } = useAPIMutation(
+    (data: { contractorId: string; message: string }) =>
+      Promise.resolve() // Placeholder for actual API call
+  );
+
+  const { execute: createOrder } = useAPIMutation(
+    (data: { contractorId: string; serviceId: string; details: string }) =>
+      marketplaceAPI.createOrder(data)
+  );
+
+  const messageForm = useForm({
+    initialValues: { message: '' },
+    validationSchema: {
+      message: [
+        CommonValidation.required('Please enter a message'),
+        CommonValidation.minLength(5, 'Message must be at least 5 characters'),
+      ],
+    },
+    onSubmit: async (values) => {
+      if (!selectedContractor) return;
+      try {
+        await sendMessage({
+          contractorId: selectedContractor.id,
+          message: values.message,
+        });
+        messageForm.resetForm();
+        closeMessage();
+        addToast({
+          type: 'success',
+          message: 'Message sent successfully',
+          duration: 3000,
+        });
+      } catch (error) {
+        addToast({
+          type: 'error',
+          message: error instanceof Error ? error.message : 'Failed to send message',
+          duration: 4000,
+        });
+      }
+    },
+  });
+
+  const hireForm = useForm({
+    initialValues: { service: '', hours: '1', details: '' },
+    validationSchema: {
+      service: [CommonValidation.required('Please select a service')],
+      hours: [CommonValidation.required('Please enter hours')],
+      details: [
+        CommonValidation.required('Please enter project details'),
+        CommonValidation.minLength(10, 'Details must be at least 10 characters'),
+      ],
+    },
+    onSubmit: async (values) => {
+      if (!selectedContractor) return;
+      try {
+        await createOrder({
+          contractorId: selectedContractor.id,
+          serviceId: values.service,
+          details: values.details,
+        });
+        hireForm.resetForm();
+        closeHire();
+        addToast({
+          type: 'success',
+          message: 'Order created successfully',
+          duration: 3000,
+        });
+      } catch (error) {
+        addToast({
+          type: 'error',
+          message: error instanceof Error ? error.message : 'Failed to create order',
+          duration: 4000,
+        });
+      }
+    },
+  });
 
   const [contractors] = useState<Contractor[]>([
     {
@@ -251,7 +339,15 @@ export const Marketplace: React.FC = () => {
                           ))}
                         </div>
                       </div>
-                      <Button variant="accent">Hire</Button>
+                      <Button
+                        variant="accent"
+                        onClick={() => {
+                          setSelectedContractor(contractor);
+                          openHire();
+                        }}
+                      >
+                        Hire
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -308,7 +404,15 @@ export const Marketplace: React.FC = () => {
                           {contractor.completedJobs}
                         </td>
                         <td className="py-3 px-4 text-center">
-                          <Button size="sm">Message</Button>
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              setSelectedContractor(contractor);
+                              openMessage();
+                            }}
+                          >
+                            Message
+                          </Button>
                         </td>
                       </tr>
                     ))}
@@ -378,6 +482,169 @@ export const Marketplace: React.FC = () => {
             </CardBody>
           </Card>
         )}
+
+        {/* Message Modal */}
+        <Modal
+          isOpen={isMessageOpen}
+          onClose={closeMessage}
+          title={`Message ${selectedContractor?.name}`}
+          size="md"
+        >
+          <form
+            onSubmit={(e: any) => {
+              e.preventDefault();
+              messageForm.handleSubmit(e);
+            }}
+            className="space-y-4"
+          >
+            {messageForm.errors.message && (
+              <div
+                className="p-3 rounded-lg border border-bad text-sm text-bad"
+                style={{
+                  backgroundColor: 'var(--bg-2)',
+                  borderColor: 'var(--bad)',
+                }}
+              >
+                {messageForm.errors.message}
+              </div>
+            )}
+            <textarea
+              {...messageForm.getFieldProps('message')}
+              onBlur={(e) => messageForm.handleBlur(e)}
+              placeholder="Type your message..."
+              className="w-full p-3 rounded-lg border border-line-2 text-sm"
+              style={{
+                backgroundColor: 'var(--bg-2)',
+                color: 'var(--ink-0)',
+                borderColor: messageForm.errors.message
+                  ? 'var(--bad)'
+                  : 'var(--line-2)',
+              }}
+              rows={4}
+            />
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="default"
+                onClick={closeMessage}
+                disabled={messageForm.isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                type="submit"
+                disabled={messageForm.isSubmitting}
+              >
+                {messageForm.isSubmitting ? 'Sending...' : 'Send Message'}
+              </Button>
+            </div>
+          </form>
+        </Modal>
+
+        {/* Hire Modal */}
+        <Modal
+          isOpen={isHireOpen}
+          onClose={closeHire}
+          title={`Hire ${selectedContractor?.name}`}
+          size="md"
+        >
+          <form
+            onSubmit={(e: any) => {
+              e.preventDefault();
+              hireForm.handleSubmit(e);
+            }}
+            className="space-y-4"
+          >
+            {hireForm.submitError && (
+              <div
+                className="p-3 rounded-lg border border-bad text-sm text-bad"
+                style={{
+                  backgroundColor: 'var(--bg-2)',
+                  borderColor: 'var(--bad)',
+                }}
+              >
+                {hireForm.submitError.message}
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Service</label>
+              <select
+                {...hireForm.getFieldProps('service')}
+                className="w-full px-3 py-2 rounded-lg border border-line-2 text-sm"
+                style={{
+                  backgroundColor: 'var(--bg-2)',
+                  color: 'var(--ink-0)',
+                  borderColor: hireForm.errors.service
+                    ? 'var(--bad)'
+                    : 'var(--line-2)',
+                }}
+              >
+                <option value="">Select a service...</option>
+                <option value="installation">Installation</option>
+                <option value="repair">Repair</option>
+                <option value="consultation">Consultation</option>
+                <option value="renovation">Renovation</option>
+              </select>
+              {hireForm.errors.service && (
+                <p className="text-xs text-bad mt-1">{hireForm.errors.service}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Hours Needed</label>
+              <input
+                type="number"
+                {...hireForm.getFieldProps('hours')}
+                className="w-full px-3 py-2 rounded-lg border border-line-2 text-sm"
+                style={{
+                  backgroundColor: 'var(--bg-2)',
+                  color: 'var(--ink-0)',
+                  borderColor: 'var(--line-2)',
+                }}
+                min="1"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Project Details</label>
+              <textarea
+                {...hireForm.getFieldProps('details')}
+                onBlur={(e) => hireForm.handleBlur(e)}
+                placeholder="Describe the work you need..."
+                className="w-full p-3 rounded-lg border border-line-2 text-sm"
+                style={{
+                  backgroundColor: 'var(--bg-2)',
+                  color: 'var(--ink-0)',
+                  borderColor: hireForm.errors.details
+                    ? 'var(--bad)'
+                    : 'var(--line-2)',
+                }}
+                rows={4}
+              />
+              {hireForm.errors.details && (
+                <p className="text-xs text-bad mt-1">{hireForm.errors.details}</p>
+              )}
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="default"
+                onClick={closeHire}
+                disabled={hireForm.isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                type="submit"
+                disabled={hireForm.isSubmitting}
+              >
+                {hireForm.isSubmitting ? 'Creating Order...' : 'Create Order'}
+              </Button>
+            </div>
+          </form>
+        </Modal>
       </div>
     </PageLayout>
   );
