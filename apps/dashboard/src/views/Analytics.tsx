@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Button,
   Card,
@@ -8,6 +8,8 @@ import {
   KPI,
   PageLayout,
 } from '@/components';
+import { useAPI } from '@/hooks';
+import { analyticsAPI } from '@/services/api';
 
 interface NavItem {
   id: string;
@@ -44,7 +46,12 @@ export const Analytics: React.FC = () => {
   const [activeNav, setActiveNav] = useState('analytics');
   const [dateRange, setDateRange] = useState('30d');
 
-  const [metrics] = useState<AnalyticsMetric[]>([
+  const { data: analyticsData, loading: loadingAnalytics } = useAPI(
+    () => analyticsAPI.getTrends(dateRange),
+    [dateRange]
+  );
+
+  const defaultMetrics: AnalyticsMetric[] = [
     {
       label: 'Active Users',
       value: 3847,
@@ -77,27 +84,33 @@ export const Analytics: React.FC = () => {
       color: 'violet',
       spark: [2500, 2800, 3100, 3400, 3800, 4200, 4600, 5000, 5400, 5800, 6200, 6700],
     },
-  ]);
+  ];
 
-  const [subscription] = useState<ReportData[]>([
+  const defaultSubscription: ReportData[] = [
     { category: 'Free', value: 2100, growth: 5.2 },
     { category: 'Pro', value: 1240, growth: 18.3 },
     { category: 'Enterprise', value: 420, growth: 42.1 },
     { category: 'Marketplace', value: 87, growth: 65.8 },
-  ]);
+  ];
 
-  const [engagement] = useState<ReportData[]>([
+  const defaultEngagement: ReportData[] = [
     { category: 'Daily Active', value: 1856, growth: 8.9 },
     { category: 'Weekly Active', value: 3847, growth: 12.5 },
     { category: 'Monthly Active', value: 8934, growth: 7.2 },
-  ]);
+  ];
 
-  const [features] = useState<ReportData[]>([
+  const defaultFeatures: ReportData[] = [
     { category: 'Product Search', value: 28450, growth: 8.3 },
     { category: 'Price Tracking', value: 12340, growth: 15.7 },
     { category: 'Marketplace', value: 5420, growth: 42.1 },
     { category: 'Community Forum', value: 8934, growth: 21.3 },
-  ]);
+  ];
+
+  // Use API data if available, otherwise use defaults
+  const metrics = analyticsData?.metrics || defaultMetrics;
+  const subscription = analyticsData?.subscription || defaultSubscription;
+  const engagement = analyticsData?.engagement || defaultEngagement;
+  const features = analyticsData?.features || defaultFeatures;
 
   return (
     <PageLayout
@@ -123,29 +136,35 @@ export const Analytics: React.FC = () => {
             <Button
               variant={dateRange === '7d' ? 'primary' : 'default'}
               onClick={() => setDateRange('7d')}
+              disabled={loadingAnalytics}
             >
               7 Days
             </Button>
             <Button
               variant={dateRange === '30d' ? 'primary' : 'default'}
               onClick={() => setDateRange('30d')}
+              disabled={loadingAnalytics}
             >
               30 Days
             </Button>
             <Button
               variant={dateRange === '90d' ? 'primary' : 'default'}
               onClick={() => setDateRange('90d')}
+              disabled={loadingAnalytics}
             >
               90 Days
             </Button>
             <Button
               variant={dateRange === '1y' ? 'primary' : 'default'}
               onClick={() => setDateRange('1y')}
+              disabled={loadingAnalytics}
             >
               1 Year
             </Button>
           </div>
-          <Button variant="accent">Export Report</Button>
+          <Button variant="accent" disabled={loadingAnalytics}>
+            {loadingAnalytics ? 'Generating...' : 'Export Report'}
+          </Button>
         </div>
 
         {/* Key Metrics */}
