@@ -65,9 +65,10 @@
 - [x] Price Prediction (exponential smoothing, seasonal patterns)
 - [x] Forecasting with Confidence Scoring
 - [x] Seasonal Pattern Detection (month-by-month analysis)
+- [x] Advanced Product Matching (semantic matching with embeddings)
+- [x] Image-Based Product Matching (visual similarity, duplicate detection)
 
 **Remaining Phase 2 Features:**
-- [ ] Better Product Matching (semantic, image-based with embeddings)
 - [ ] Dashboard Enhancements (market trends, analytics charts, real-time updates)
 - [ ] Bulk Operations (multi-product analysis, batch export)
 - [ ] ML-based Price Optimization (demand prediction, margin analysis)
@@ -116,19 +117,20 @@
 
 | Metric | Phase 1 | Phase 2 | Phase 3+ |
 |--------|---------|---------|----------|
-| API Endpoints | 10 | +41 | +20 |
-| Database Tables | +3 | +0 (existing) | +4 |
-| Modules | +3 | +10 (core + analytics + reports + prediction) | +3 |
-| Lines of Code | +1,100 | ~4,600 | ~3,500 |
-| Build Time | ~45s | ~55s (now 4.5s with Turbo) | ~65s |
+| API Endpoints | 10 | +49 | +20 |
+| Database Tables | +3 | +1 (AIEmbedding) | +4 |
+| Modules | +3 | +11 (core + advanced matching + analytics + reports + prediction) | +3 |
+| Lines of Code | +1,100 | ~5,700 | ~3,500 |
+| Build Time | ~45s | ~55s (now 3.3s with Turbo) | ~65s |
 | Test Coverage | 60% | 80% | 90% |
 
 **Phase 2 Endpoints Breakdown:**
-- Core Intelligence: 21 endpoints (recommendations, comparison, quality, matching, contractor)
+- Core Intelligence: 29 endpoints (recommendations, comparison, quality, matching+advanced, contractor)
 - Market Intelligence: 6 endpoints (brand metrics, trends, positioning, volatility, best-buy)
 - Contractor Analytics: 7 endpoints (ROI, TCO, job estimation, brand ranking, cost savings)
-- Reports & Export: 7 endpoints (CSV exports, summaries, metadata)
+- Reports & Export: 9 endpoints (CSV/PDF exports, summaries, metadata)
 - Price Prediction: 4 endpoints (patterns, forecast, seasonal, recommendation)
+- Advanced Matching: 8 endpoints (semantic similarity, image similarity, deduplication)
 
 ---
 
