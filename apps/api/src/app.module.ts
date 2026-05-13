@@ -23,6 +23,7 @@ import { RealtimeModule } from './modules/realtime/realtime.module';
 import { ContentModule } from './modules/content/content.module';
 import { PriceOptimizationModule } from './modules/price-optimization/price-optimization.module';
 import { IntegrationsModule } from './modules/integrations/integrations.module';
+import { CommunityModule } from './modules/community/community.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -49,6 +50,7 @@ import { HealthController } from './health.controller';
     ContentModule,
     PriceOptimizationModule,
     IntegrationsModule,
+    CommunityModule,
     ProductModule,
     PricingModule,
     MatchingModule,
