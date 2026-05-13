@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
-import { Dashboard, ProductTerminal, Marketplace, Community, Billing, Analytics, AIConsole, Settings } from './views';
+import { Login, Dashboard, ProductTerminal, Marketplace, Community, Billing, Analytics, AIConsole, Settings } from './views';
+import { useAuth } from './hooks';
 
 type PageType = 'dashboard' | 'terminal' | 'marketplace' | 'forum' | 'billing' | 'analytics' | 'ai' | 'settings';
 
 export const App: React.FC = () => {
+  const { isAuthenticated } = useAuth();
   const [currentPage, setCurrentPage] = useState<PageType>('dashboard');
+
+  const handleLoginSuccess = () => {
+    setCurrentPage('dashboard');
+  };
 
   const handleNavigate = (navId: string) => {
     switch (navId) {
@@ -35,6 +41,11 @@ export const App: React.FC = () => {
     }
     window.scrollTo(0, 0);
   };
+
+  // Show login if not authenticated
+  if (!isAuthenticated) {
+    return <Login onLoginSuccess={handleLoginSuccess} />;
+  }
 
   switch (currentPage) {
     case 'terminal':
