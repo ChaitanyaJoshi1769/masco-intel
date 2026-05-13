@@ -7,6 +7,8 @@ import {
   Chip,
   PageLayout,
 } from '@/components';
+import { useAPIMutation } from '@/hooks';
+import { useToast } from '@/hooks';
 
 interface NavItem {
   id: string;
@@ -37,8 +39,13 @@ export const Settings: React.FC = () => {
   const [activeNav, setActiveNav] = useState('dashboard');
   const [activeTab, setActiveTab] = useState<'account' | 'notifications' | 'integrations' | 'privacy'>('account');
   const [saved, setSaved] = useState(false);
+  const { addToast } = useToast();
 
-  const [accountSettings] = useState<Setting[]>([
+  const { execute: saveSettings, loading: isSaving } = useAPIMutation(
+    (data: any) => Promise.resolve() // Placeholder for actual API call
+  );
+
+  const [accountSettings, setAccountSettings] = useState<Setting[]>([
     {
       key: 'email',
       label: 'Email',
@@ -81,7 +88,7 @@ export const Settings: React.FC = () => {
     },
   ]);
 
-  const [notificationSettings] = useState<Setting[]>([
+  const [notificationSettings, setNotificationSettings] = useState<Setting[]>([
     {
       key: 'emailNotifications',
       label: 'Email Notifications',
@@ -112,7 +119,7 @@ export const Settings: React.FC = () => {
     },
   ]);
 
-  const [integrationSettings] = useState<Setting[]>([
+  const [integrationSettings, setIntegrationSettings] = useState<Setting[]>([
     {
       key: 'apiAccess',
       label: 'API Access',
@@ -136,7 +143,7 @@ export const Settings: React.FC = () => {
     },
   ]);
 
-  const [privacySettings] = useState<Setting[]>([
+  const [privacySettings, setPrivacySettings] = useState<Setting[]>([
     {
       key: 'profileVisibility',
       label: 'Profile Visibility',
@@ -165,12 +172,43 @@ export const Settings: React.FC = () => {
     },
   ]);
 
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+  const handleSave = async () => {
+    try {
+      const allSettings = {
+        account: Object.fromEntries(accountSettings.map(s => [s.key, s.value])),
+        notifications: Object.fromEntries(notificationSettings.map(s => [s.key, s.value])),
+        integrations: Object.fromEntries(integrationSettings.map(s => [s.key, s.value])),
+        privacy: Object.fromEntries(privacySettings.map(s => [s.key, s.value])),
+      };
+      await saveSettings(allSettings);
+      setSaved(true);
+      addToast({
+        type: 'success',
+        message: 'Settings saved successfully',
+        duration: 3000,
+      });
+      setTimeout(() => setSaved(false), 3000);
+    } catch (error) {
+      addToast({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Failed to save settings',
+        duration: 4000,
+      });
+    }
   };
 
-  const renderSettings = (settings: Setting[]) => (
+  const updateSetting = (
+    settings: Setting[],
+    setSetter: (s: Setting[]) => void,
+    key: string,
+    value: any
+  ) => {
+    setSetter(
+      settings.map(s => (s.key === key ? { ...s, value } : s))
+    );
+  };
+
+  const renderSettings = (settings: Setting[], setter: (s: Setting[]) => void) => (
     <div className="space-y-4">
       {settings.map((setting) => (
         <div
@@ -185,10 +223,12 @@ export const Settings: React.FC = () => {
             </div>
             {setting.type === 'toggle' && (
               <button
+                onClick={() => updateSetting(settings, setter, setting.key, !setting.value)}
                 className="relative w-12 h-6 rounded-full transition-colors"
                 style={{
                   backgroundColor: setting.value ? 'var(--ok)' : 'var(--bg-3)',
                 }}
+                disabled={isSaving}
               >
                 <div
                   className="absolute top-1 w-4 h-4 rounded-full transition-transform"
@@ -203,25 +243,27 @@ export const Settings: React.FC = () => {
               <input
                 type="text"
                 value={setting.value}
-                readOnly
-                className="px-2 py-1 rounded text-sm border border-line-2 bg-bg-3"
+                onChange={(e) => updateSetting(settings, setter, setting.key, e.target.value)}
+                className="px-2 py-1 rounded text-sm border border-line-2"
                 style={{
                   backgroundColor: 'var(--bg-3)',
                   borderColor: 'var(--line-2)',
                   color: 'var(--ink-1)',
                 }}
+                disabled={isSaving}
               />
             )}
             {setting.type === 'select' && (
               <select
                 value={setting.value}
-                readOnly
-                className="px-2 py-1 rounded text-sm border border-line-2 bg-bg-3"
+                onChange={(e) => updateSetting(settings, setter, setting.key, e.target.value)}
+                className="px-2 py-1 rounded text-sm border border-line-2"
                 style={{
                   backgroundColor: 'var(--bg-3)',
                   borderColor: 'var(--line-2)',
                   color: 'var(--ink-1)',
                 }}
+                disabled={isSaving}
               >
                 {setting.options?.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -309,7 +351,7 @@ export const Settings: React.FC = () => {
               <h3 className="text-base font-semibold">Account Settings</h3>
             </CardHeader>
             <CardBody>
-              {renderSettings(accountSettings)}
+              {renderSettings(accountSettings, setAccountSettings)}
             </CardBody>
           </Card>
         )}
@@ -321,7 +363,7 @@ export const Settings: React.FC = () => {
               <h3 className="text-base font-semibold">Notification Preferences</h3>
             </CardHeader>
             <CardBody>
-              {renderSettings(notificationSettings)}
+              {renderSettings(notificationSettings, setNotificationSettings)}
             </CardBody>
           </Card>
         )}
@@ -333,7 +375,7 @@ export const Settings: React.FC = () => {
               <h3 className="text-base font-semibold">Integrations & API</h3>
             </CardHeader>
             <CardBody>
-              {renderSettings(integrationSettings)}
+              {renderSettings(integrationSettings, setIntegrationSettings)}
               <div className="mt-6 p-4 rounded-lg border border-line-1" style={{ backgroundColor: 'var(--bg-2)' }}>
                 <h4 className="font-medium text-sm mb-2">API Key</h4>
                 <p className="text-xs text-ink-3 mb-3">
@@ -366,7 +408,7 @@ export const Settings: React.FC = () => {
               <h3 className="text-base font-semibold">Privacy & Data</h3>
             </CardHeader>
             <CardBody>
-              {renderSettings(privacySettings)}
+              {renderSettings(privacySettings, setPrivacySettings)}
               <div className="mt-6 p-4 rounded-lg border border-line-1" style={{ backgroundColor: 'var(--bg-2)' }}>
                 <h4 className="font-medium text-sm mb-2">Data & Privacy</h4>
                 <p className="text-xs text-ink-3 mb-4">
@@ -383,8 +425,8 @@ export const Settings: React.FC = () => {
 
         {/* Save Button */}
         <div className="flex items-center gap-4">
-          <Button variant="primary" onClick={handleSave}>
-            Save Changes
+          <Button variant="primary" onClick={handleSave} disabled={isSaving}>
+            {isSaving ? 'Saving...' : 'Save Changes'}
           </Button>
           {saved && (
             <div className="flex items-center gap-2 text-ok text-sm">
