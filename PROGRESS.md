@@ -32,7 +32,7 @@
 ---
 
 ### 🟡 Phase 2: Intelligence & Insights (4-6 weeks) - IN PROGRESS
-**Estimated Effort:** 60-80 hours → Actual: 14 hours (accelerated)  
+**Estimated Effort:** 60-80 hours → Actual: 18 hours (accelerated)  
 **Team Size:** 2-3 developers → Actual: 1 (automated)  
 
 **Features Implemented (Core):**
@@ -60,6 +60,8 @@
 - [x] Price Trend Analysis (90-day, 6-month, 1-year patterns)
 - [x] Best Buy Time Recommendations
 - [x] Cost Savings Analysis (alternative comparison)
+- [x] Reports & Export (CSV generation, market analysis reports)
+- [x] Executive Summary Reports (market insights, health scores)
 
 **Planned Features (Next):**
 - [ ] Reports & Export (PDF, CSV, dashboards)
@@ -106,17 +108,18 @@
 
 | Metric | Phase 1 | Phase 2 | Phase 3+ |
 |--------|---------|---------|----------|
-| API Endpoints | 10 | +28 | +20 |
+| API Endpoints | 10 | +37 | +20 |
 | Database Tables | +3 | +0 (existing) | +4 |
-| Modules | +3 | +8 (core + analytics) | +3 |
-| Lines of Code | +1,100 | ~3,500 | ~3,500 |
-| Build Time | ~45s | ~55s (now 3s with Turbo) | ~65s |
+| Modules | +3 | +9 (core + analytics + reports) | +3 |
+| Lines of Code | +1,100 | ~4,200 | ~3,500 |
+| Build Time | ~45s | ~55s (now 5s with Turbo) | ~65s |
 | Test Coverage | 60% | 80% | 90% |
 
 **Phase 2 Endpoints Breakdown:**
 - Core Intelligence: 21 endpoints (recommendations, comparison, quality, matching, contractor)
 - Market Intelligence: 6 endpoints (brand metrics, trends, positioning, volatility, best-buy)
 - Contractor Analytics: 7 endpoints (ROI, TCO, job estimation, brand ranking, cost savings)
+- Reports & Export: 7 endpoints (CSV exports, summaries, metadata)
 
 ---
 
