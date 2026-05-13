@@ -9,6 +9,8 @@ import {
   PageLayout,
   Sparkline,
 } from '@/components';
+import { useAPI } from '@/hooks';
+import { dashboardAPI } from '@/services/api';
 
 interface NavItem {
   id: string;
@@ -62,7 +64,8 @@ interface CategoryMetric {
 
 export const Dashboard: React.FC = () => {
   const [activeNav, setActiveNav] = useState('dashboard');
-  const [metrics, setMetrics] = useState<DashboardMetrics>({
+
+  const defaultMetrics: DashboardMetrics = {
     totalOrders: 2847,
     avgCost: 385,
     totalSavings: 12500,
@@ -71,9 +74,29 @@ export const Dashboard: React.FC = () => {
     costTrend: [350, 375, 360, 400, 390, 425, 415],
     savingsTrend: [500, 750, 600, 1200, 950, 1500, 1400],
     complianceTrend: [85, 88, 90, 92, 91, 94, 94],
-  });
+  };
 
-  const [watchlist] = useState<WatchlistItem[]>([
+  const { data: metrics = defaultMetrics, loading: loadingMetrics } = useAPI(
+    () => dashboardAPI.getMetrics(),
+    []
+  );
+
+  const { data: watchlist = [], loading: loadingWatchlist } = useAPI(
+    () => dashboardAPI.getWatchlist(),
+    []
+  );
+
+  const { data: insights = [], loading: loadingInsights } = useAPI(
+    () => dashboardAPI.getDigest(),
+    []
+  );
+
+  const { data: categories = [], loading: loadingCategories } = useAPI(
+    () => dashboardAPI.getCategoryHeatmap(),
+    []
+  );
+
+  const defaultWatchlist: WatchlistItem[] = [
     {
       id: '1',
       sku: '9159-AR-DST',
@@ -101,9 +124,9 @@ export const Dashboard: React.FC = () => {
       priceDelta: -4.2,
       status: 'low',
     },
-  ]);
+  ];
 
-  const [insights] = useState<AIInsight[]>([
+  const defaultInsights: AIInsight[] = [
     {
       id: '1',
       tag: 'PRICING',
@@ -122,15 +145,19 @@ export const Dashboard: React.FC = () => {
       text: 'Plumbing supply shortage expected next month',
       confidence: 0.78,
     },
-  ]);
+  ];
 
-  const [categories] = useState<CategoryMetric[]>([
+  const defaultCategories: CategoryMetric[] = [
     { category: 'Faucets', spending: 45000, percentage: 32 },
     { category: 'Fixtures', spending: 38000, percentage: 27 },
     { category: 'Valves', spending: 28000, percentage: 20 },
     { category: 'Pumps', spending: 22000, percentage: 16 },
     { category: 'Pipes', spending: 7000, percentage: 5 },
-  ]);
+  ];
+
+  const activeWatchlist = watchlist && watchlist.length > 0 ? watchlist : defaultWatchlist;
+  const activeInsights = insights && insights.length > 0 ? insights : defaultInsights;
+  const activeCategories = categories && categories.length > 0 ? categories : defaultCategories;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -256,7 +283,7 @@ export const Dashboard: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {watchlist.map((item) => (
+                  {activeWatchlist.map((item) => (
                     <tr key={item.id} className="border-b border-line-1 hover:bg-bg-2 transition">
                       <td className="py-3 px-4 font-mono text-xs text-cyan">
                         {item.sku}
@@ -311,7 +338,7 @@ export const Dashboard: React.FC = () => {
               </div>
             </CardHeader>
             <CardBody className="space-y-3">
-              {insights.map((insight) => (
+              {activeInsights.map((insight) => (
                 <div
                   key={insight.id}
                   className="p-3 rounded-lg"
@@ -343,7 +370,7 @@ export const Dashboard: React.FC = () => {
               <h3 className="text-base font-semibold">Procurement by Category</h3>
             </CardHeader>
             <CardBody className="space-y-4">
-              {categories.map((cat, idx) => (
+              {activeCategories.map((cat, idx) => (
                 <div key={idx}>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium">{cat.category}</span>
