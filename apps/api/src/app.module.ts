@@ -14,6 +14,7 @@ import { MarketIntelligenceModule } from './modules/market-intelligence/market-i
 import { ContractorAnalyticsModule } from './modules/contractor-analytics/contractor-analytics.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { PricePredictionModule } from './modules/price-prediction/price-prediction.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -31,6 +32,7 @@ import { HealthController } from './health.controller';
     ContractorAnalyticsModule,
     ReportsModule,
     PricePredictionModule,
+    DashboardModule,
     ProductModule,
     PricingModule,
     MatchingModule,
