@@ -21,6 +21,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { RetailersModule } from './modules/retailers/retailers.module';
 import { RealtimeModule } from './modules/realtime/realtime.module';
 import { ContentModule } from './modules/content/content.module';
+import { PriceOptimizationModule } from './modules/price-optimization/price-optimization.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -45,6 +46,7 @@ import { HealthController } from './health.controller';
     RetailersModule,
     RealtimeModule,
     ContentModule,
+    PriceOptimizationModule,
     ProductModule,
     PricingModule,
     MatchingModule,

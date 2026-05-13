@@ -1,12 +1,14 @@
 import { Controller, Post, Get, Param, Body } from '@nestjs/common';
 import { MenardsScraperService } from './menards-scraper.service';
 import { AceHardwareScraperService } from './ace-hardware-scraper.service';
+import { GrangerScraperService } from './grainger-scraper.service';
 
 @Controller('retailers')
 export class RetailersController {
   constructor(
     private menardsService: MenardsScraperService,
     private aceService: AceHardwareScraperService,
+    private grangerService: GrangerScraperService,
   ) {}
 
   /**
@@ -40,6 +42,21 @@ export class RetailersController {
   }
 
   /**
+   * Scrape Grainger for products
+   * POST /retailers/grainger/scrape?category=faucets
+   */
+  @Post('grainger/scrape')
+  async scrapeGrainger(@Param('category') category = 'faucets') {
+    const result = await this.grangerService.scrapeProducts(category);
+    return {
+      success: true,
+      retailer: 'Grainger',
+      data: result,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  /**
    * Scrape all retailers
    * POST /retailers/scrape-all
    * Body: { categories?: string[] }
@@ -52,6 +69,7 @@ export class RetailersController {
     const results = {
       menards: { success: false, data: null as any },
       ace: { success: false, data: null as any },
+      grainger: { success: false, data: null as any },
     };
 
     for (const category of categories) {
@@ -72,10 +90,19 @@ export class RetailersController {
       } catch (error) {
         results.ace.data = { error: error instanceof Error ? error.message : 'Failed' };
       }
+
+      try {
+        results.grainger = {
+          success: true,
+          data: await this.grangerService.scrapeProducts(category)
+        };
+      } catch (error) {
+        results.grainger.data = { error: error instanceof Error ? error.message : 'Failed' };
+      }
     }
 
     return {
-      success: results.menards.success && results.ace.success,
+      success: results.menards.success && results.ace.success && results.grainger.success,
       data: results,
       timestamp: new Date().toISOString(),
     };
@@ -115,9 +142,16 @@ export class RetailersController {
             status: 'active',
             productsScraped: 'estimated 40',
           },
+          {
+            name: 'Grainger',
+            domain: 'grainger.com',
+            status: 'active',
+            productsScraped: 'estimated 30',
+            focus: 'Industrial/Contractor-grade',
+          },
         ],
-        totalRetailers: 4,
-        totalProductsScraped: 'estimated 685+',
+        totalRetailers: 5,
+        totalProductsScraped: 'estimated 715+',
       },
       timestamp: new Date().toISOString(),
     };
