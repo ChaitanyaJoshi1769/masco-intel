@@ -8,6 +8,9 @@ import {
   KPI,
   PageLayout,
 } from '@/components';
+import { useAPIMutation } from '@/hooks';
+import { useToast } from '@/hooks';
+import { subscriptionAPI } from '@/services/api';
 
 interface NavItem {
   id: string;
@@ -53,6 +56,32 @@ interface Invoice {
 export const Billing: React.FC = () => {
   const [activeNav, setActiveNav] = useState('billing');
   const [viewMode, setViewMode] = useState<'plans' | 'usage' | 'invoices'>('plans');
+  const [upgradingPlanId, setUpgradingPlanId] = useState<string | null>(null);
+  const { addToast } = useToast();
+
+  const { execute: upgradePlan } = useAPIMutation(
+    (planId: string) => subscriptionAPI.upgrade(planId)
+  );
+
+  const handleUpgrade = async (planId: string) => {
+    setUpgradingPlanId(planId);
+    try {
+      await upgradePlan(planId);
+      addToast({
+        type: 'success',
+        message: `Successfully upgraded to ${plans.find(p => p.id === planId)?.name} plan`,
+        duration: 3000,
+      });
+    } catch (error) {
+      addToast({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Failed to upgrade plan',
+        duration: 4000,
+      });
+    } finally {
+      setUpgradingPlanId(null);
+    }
+  };
 
   const [plans] = useState<Plan[]>([
     {
@@ -288,8 +317,14 @@ export const Billing: React.FC = () => {
                         Limited Plan
                       </Button>
                     ) : (
-                      <Button variant="accent">
-                        Upgrade to {plan.name}
+                      <Button
+                        variant="accent"
+                        onClick={() => handleUpgrade(plan.id)}
+                        disabled={upgradingPlanId !== null}
+                      >
+                        {upgradingPlanId === plan.id
+                          ? 'Upgrading...'
+                          : `Upgrade to ${plan.name}`}
                       </Button>
                     )}
                   </div>
