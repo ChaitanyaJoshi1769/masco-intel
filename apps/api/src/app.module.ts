@@ -19,6 +19,7 @@ import { BulkOperationsModule } from './modules/bulk-operations/bulk-operations.
 import { SearchModule } from './modules/search/search.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { RetailersModule } from './modules/retailers/retailers.module';
+import { RealtimeModule } from './modules/realtime/realtime.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -41,6 +42,7 @@ import { HealthController } from './health.controller';
     SearchModule,
     NotificationsModule,
     RetailersModule,
+    RealtimeModule,
     ProductModule,
     PricingModule,
     MatchingModule,
