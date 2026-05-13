@@ -9,6 +9,8 @@ import { WebhookSignatureService } from './webhook-signature.service';
 import { WebhookSignatureController } from './webhook-signature.controller';
 import { DataSyncService } from './data-sync.service';
 import { DataSyncController } from './data-sync.controller';
+import { PermissionService } from './permission.service';
+import { PermissionController } from './permission.controller';
 
 @Module({
   controllers: [
@@ -17,6 +19,7 @@ import { DataSyncController } from './data-sync.controller';
     OAuthController,
     WebhookSignatureController,
     DataSyncController,
+    PermissionController,
   ],
   providers: [
     IntegrationsService,
@@ -24,6 +27,7 @@ import { DataSyncController } from './data-sync.controller';
     OAuthService,
     WebhookSignatureService,
     DataSyncService,
+    PermissionService,
   ],
   exports: [
     IntegrationsService,
@@ -31,6 +35,7 @@ import { DataSyncController } from './data-sync.controller';
     OAuthService,
     WebhookSignatureService,
     DataSyncService,
+    PermissionService,
   ],
 })
 export class IntegrationsModule {}
