@@ -8,3 +8,7 @@ export { KPI, Sparkline } from './primitives/KPI';
 export { SideNav } from './layout/SideNav';
 export { TopBar } from './layout/TopBar';
 export { PageLayout } from './layout/PageLayout';
+
+// Utilities
+export { Loading } from './Loading';
+export { Error } from './Error';
