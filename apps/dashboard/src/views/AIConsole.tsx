@@ -7,7 +7,7 @@ import {
   Chip,
   PageLayout,
 } from '@/components';
-import { useAPI, useAPIMutation, useToast } from '@/hooks';
+import { useAPI, useAPIMutation, useToast, useWebSocket } from '@/hooks';
 import { chatbotAPI } from '@/services/api';
 
 interface NavItem {
@@ -57,7 +57,17 @@ export const AIConsole: React.FC = () => {
     },
   ]);
   const [inputValue, setInputValue] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // WebSocket connection
+  const {
+    connected: wsConnected,
+    sendMessage: wsSendMessage,
+    joinConversation: wsJoinConversation,
+    on: wsOn,
+  } = useWebSocket();
 
   // Initialize conversation
   const { mutate: createConversation, loading: creatingConversation } = useAPIMutation(
@@ -65,6 +75,9 @@ export const AIConsole: React.FC = () => {
     {
       onSuccess: (data: any) => {
         setConversationId(data.id);
+        if (wsConnected) {
+          wsJoinConversation(data.id);
+        }
       },
       onError: () => {
         showToast('Failed to initialize conversation', 'error');
@@ -72,34 +85,47 @@ export const AIConsole: React.FC = () => {
     }
   );
 
-  // Send message mutation
-  const { mutate: sendMessage, loading: sendingMessage } = useAPIMutation(
-    (content: string) => conversationId ? chatbotAPI.sendMessage(conversationId, content) : Promise.reject('No conversation'),
-    {
-      onSuccess: (data: any) => {
-        if (data.content) {
-          const assistantMessage: Message = {
-            id: (Date.now() + 1).toString(),
-            role: 'assistant',
-            content: data.content,
-            timestamp: new Date().toLocaleString(),
-            toolCalls: data.toolCalls,
-          };
-          setMessages((prev) => [...prev, assistantMessage]);
-        }
-      },
-      onError: () => {
-        showToast('Failed to send message', 'error');
-      },
-    }
-  );
-
   // Initialize conversation on mount
   useEffect(() => {
-    if (!conversationId && !creatingConversation) {
+    if (!conversationId && !creatingConversation && wsConnected) {
       createConversation();
     }
-  }, []);
+  }, [wsConnected]);
+
+  // Set up WebSocket listeners
+  useEffect(() => {
+    if (!wsConnected) return;
+
+    const unsubscribeMessage = wsOn('message-received', (message: Message) => {
+      setMessages((prev) => [...prev, message]);
+      setIsTyping(false);
+    });
+
+    const unsubscribeTyping = wsOn('user-typing', (data: any) => {
+      if (data.isTyping) {
+        setIsTyping(true);
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
+        typingTimeoutRef.current = setTimeout(() => {
+          setIsTyping(false);
+        }, 3000);
+      }
+    });
+
+    const unsubscribeError = wsOn('message-error', (data: any) => {
+      showToast(`Error: ${data.error}`, 'error');
+    });
+
+    return () => {
+      unsubscribeMessage();
+      unsubscribeTyping();
+      unsubscribeError();
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, [wsConnected, wsOn]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -143,7 +169,7 @@ export const AIConsole: React.FC = () => {
   ];
 
   const handleSendMessage = () => {
-    if (!inputValue.trim() || !conversationId || sendingMessage) return;
+    if (!inputValue.trim() || !conversationId || !wsConnected) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -152,11 +178,12 @@ export const AIConsole: React.FC = () => {
       timestamp: new Date().toLocaleString(),
     };
 
-    setMessages([...messages, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     const messageContent = inputValue;
     setInputValue('');
 
-    sendMessage(messageContent);
+    // Send via WebSocket for real-time communication
+    wsSendMessage(conversationId, messageContent, 'user');
   };
 
   const handleToolClick = (toolName: string) => {
@@ -267,7 +294,7 @@ export const AIConsole: React.FC = () => {
               </div>
             ))}
 
-            {sendingMessage && (
+            {isTyping && (
               <div className="flex justify-start">
                 <div
                   className="rounded-lg p-4"
@@ -303,19 +330,22 @@ export const AIConsole: React.FC = () => {
                   backgroundColor: 'var(--bg-2)',
                   color: 'var(--ink-0)',
                 }}
-                disabled={sendingMessage || !conversationId}
+                disabled={!wsConnected || !conversationId}
               />
               <Button
                 variant="accent"
                 onClick={handleSendMessage}
-                disabled={!inputValue.trim() || sendingMessage || !conversationId}
+                disabled={!inputValue.trim() || !wsConnected || !conversationId}
               >
-                {sendingMessage ? 'Sending...' : 'Send'}
+                {!wsConnected ? 'Connecting...' : 'Send'}
               </Button>
             </div>
 
-            <div className="flex items-center gap-2 text-xs text-ink-3">
-              <span>💡 Tip: Use ⌘K (or Ctrl+K) to open Command Palette</span>
+            <div className="flex items-center gap-2 text-xs">
+              <span style={{ color: wsConnected ? 'var(--ok)' : 'var(--warn)' }}>
+                {wsConnected ? '● Connected' : '● Connecting...'}
+              </span>
+              <span className="text-ink-3">💡 Tip: Use ⌘K (or Ctrl+K) to open Command Palette</span>
             </div>
           </CardBody>
         </Card>
