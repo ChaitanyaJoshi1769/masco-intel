@@ -9,6 +9,10 @@ import {
   PageLayout,
   Sparkline,
 } from '@/components';
+import { useAPI } from '@/hooks';
+import { useAPIMutation } from '@/hooks';
+import { useToast } from '@/hooks';
+import { productsAPI } from '@/services/api';
 
 interface NavItem {
   id: string;
@@ -61,27 +65,64 @@ interface AIInsight {
 export const ProductTerminal: React.FC = () => {
   const [activeNav, setActiveNav] = useState('terminal');
   const [searchQuery, setSearchQuery] = useState('9159-AR-DST');
+  const [selectedProduct, setSelectedProduct] = useState<string | null>('9159-AR-DST');
+  const { addToast } = useToast();
 
-  const [product] = useState<Product>({
-    sku: '9159-AR-DST',
-    upc: '034449630906',
-    title: 'Trinsic Single-Handle Faucet with Integrated Diverter',
-    brand: 'Delta Faucet Co.',
-    oem: 'Masco Corp.',
-    tier: 'contractor',
-    rating: 4.7,
-    reviews: 1247,
-    inStock: true,
-    tracked: true,
-    components: [
-      { id: '1', name: 'RP Cartridge', type: 'Replacement Part' },
-      { id: '2', name: 'Aerator', type: 'Flow Control' },
-      { id: '3', name: 'Adapter Rings', type: 'Hardware' },
-    ],
-    oemLineage: ['Masco Corp.', 'Delta Faucet Co.', 'Cassidy'],
-  });
+  const { data: product, loading: loadingProduct } = useAPI(
+    () => selectedProduct ? productsAPI.getById(selectedProduct) : null,
+    [selectedProduct]
+  );
 
-  const [retailers] = useState<RetailerRow[]>([
+  const { data: components, loading: loadingComponents } = useAPI(
+    () => selectedProduct ? productsAPI.getComponents(selectedProduct) : null,
+    [selectedProduct]
+  );
+
+  const { data: insights, loading: loadingInsights } = useAPI(
+    () => selectedProduct ? productsAPI.getInsights(selectedProduct) : null,
+    [selectedProduct]
+  );
+
+  const { data: retailers, loading: loadingRetailers } = useAPI(
+    () => selectedProduct ? productsAPI.getRetailers(selectedProduct) : null,
+    [selectedProduct]
+  );
+
+  const { execute: toggleWatchlist } = useAPIMutation(
+    (data: { action: 'add' | 'remove'; productId: string }) =>
+      data.action === 'add'
+        ? productsAPI.addToWatchlist(data.productId)
+        : productsAPI.removeFromWatchlist(data.productId)
+  );
+
+  const handleToggleWatchlist = async () => {
+    if (!selectedProduct) return;
+    try {
+      const action = product?.tracked ? 'remove' : 'add';
+      await toggleWatchlist({ action, productId: selectedProduct });
+      addToast({
+        type: 'success',
+        message: action === 'add'
+          ? 'Product added to watchlist'
+          : 'Product removed from watchlist',
+        duration: 3000,
+      });
+    } catch (error) {
+      addToast({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Failed to update watchlist',
+        duration: 4000,
+      });
+    }
+  };
+
+  const handleSearch = async () => {
+    if (searchQuery.trim()) {
+      setSelectedProduct(searchQuery.trim());
+    }
+  };
+
+  const [defaultRetailers] = useState<RetailerRow[]>([
     {
       retailer: 'Home Depot',
       channel: 'retail',
@@ -124,7 +165,7 @@ export const ProductTerminal: React.FC = () => {
     },
   ]);
 
-  const [insights] = useState<AIInsight[]>([
+  const defaultInsights: AIInsight[] = [
     {
       id: '1',
       tag: 'PRICING',
@@ -160,7 +201,7 @@ export const ProductTerminal: React.FC = () => {
       confidence: 0.82,
       timestamp: '45 min ago',
     },
-  ]);
+  ];
 
   const [priceHistory] = useState<number[]>([
     180, 182, 181, 185, 184, 186, 188, 187, 189, 188, 186, 185.99,
@@ -211,16 +252,35 @@ export const ProductTerminal: React.FC = () => {
     }
   };
 
-  const avgPrice = retailers.reduce((sum, r) => sum + r.price, 0) / retailers.length;
-  const lowestPrice = Math.min(...retailers.map(r => r.price));
-  const highestPrice = Math.max(...retailers.map(r => r.price));
+  const activeRetailers = retailers || defaultRetailers;
+  const avgPrice = activeRetailers.reduce((sum, r) => sum + r.price, 0) / activeRetailers.length;
+  const lowestPrice = Math.min(...activeRetailers.map(r => r.price));
+  const highestPrice = Math.max(...activeRetailers.map(r => r.price));
+
+  const activeProduct = product || {
+    sku: selectedProduct || '9159-AR-DST',
+    upc: '034449630906',
+    title: 'Loading product details...',
+    brand: 'Loading...',
+    oem: 'Loading...',
+    tier: 'contractor' as const,
+    rating: 0,
+    reviews: 0,
+    inStock: false,
+    tracked: false,
+    components: [],
+    oemLineage: [],
+  };
+
+  const activeInsights = insights || defaultInsights;
+  const activeComponents = components || product?.components || [];
 
   return (
     <PageLayout
       active={activeNav}
       navItems={NAV_ITEMS}
       onNavigate={setActiveNav}
-      crumbs={['Product Terminal', product.sku]}
+      crumbs={['Product Terminal', activeProduct.sku]}
       liveIndicator={true}
       logo={
         <div className="flex items-center gap-2">
@@ -240,13 +300,17 @@ export const ProductTerminal: React.FC = () => {
             placeholder="Search by SKU, UPC, or product name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             className="flex-1 px-4 py-2 rounded-lg border border-line-2"
             style={{
               backgroundColor: 'var(--bg-2)',
               color: 'var(--ink-0)',
             }}
+            disabled={loadingProduct}
           />
-          <Button variant="primary">Search</Button>
+          <Button variant="primary" onClick={handleSearch} disabled={loadingProduct}>
+            {loadingProduct ? 'Searching...' : 'Search'}
+          </Button>
         </div>
 
         {/* Product Header + KPIs */}
@@ -255,27 +319,32 @@ export const ProductTerminal: React.FC = () => {
             <div className="flex items-start justify-between gap-6">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <Chip variant={getTierColor(product.tier)}>
-                    {product.tier.toUpperCase()}
+                  <Chip variant={getTierColor(activeProduct.tier)}>
+                    {activeProduct.tier.toUpperCase()}
                   </Chip>
-                  {product.tracked && (
+                  {activeProduct.tracked && (
                     <Chip variant="cyan">★ TRACKED</Chip>
                   )}
                 </div>
-                <h2 className="text-2xl font-bold mb-2">{product.title}</h2>
+                <h2 className="text-2xl font-bold mb-2">{activeProduct.title}</h2>
                 <div className="flex items-center gap-4 text-sm text-ink-2">
                   <span>
-                    <strong>{product.brand}</strong>
+                    <strong>{activeProduct.brand}</strong>
                   </span>
-                  <span>OEM: {product.oem}</span>
+                  <span>OEM: {activeProduct.oem}</span>
                   <span>
-                    ⭐ {product.rating} ({product.reviews.toLocaleString()} reviews)
+                    ⭐ {activeProduct.rating} ({activeProduct.reviews.toLocaleString()} reviews)
                   </span>
                 </div>
               </div>
               <div className="flex gap-2">
                 <Button variant="default">Compare</Button>
-                <Button variant="accent">Track Changes</Button>
+                <Button
+                  variant={activeProduct.tracked ? 'default' : 'accent'}
+                  onClick={handleToggleWatchlist}
+                >
+                  {activeProduct.tracked ? '★ Tracking' : 'Track Changes'}
+                </Button>
               </div>
             </div>
           </div>
@@ -316,7 +385,7 @@ export const ProductTerminal: React.FC = () => {
                 <h3 className="text-base font-semibold">Components</h3>
               </CardHeader>
               <CardBody className="space-y-3">
-                {product.components.map((comp) => (
+                {activeComponents.map((comp) => (
                   <div
                     key={comp.id}
                     className="flex items-start justify-between p-3 rounded-lg"
@@ -339,7 +408,7 @@ export const ProductTerminal: React.FC = () => {
               </CardHeader>
               <CardBody>
                 <div className="space-y-2">
-                  {product.oemLineage.map((oem, idx) => (
+                  {activeProduct.oemLineage.map((oem, idx) => (
                     <div key={idx} className="flex items-center gap-2">
                       {idx > 0 && <span className="text-ink-3">↓</span>}
                       <Chip variant="violet" className="text-xs">
@@ -386,7 +455,7 @@ export const ProductTerminal: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {retailers.map((retailer, idx) => (
+                    {activeRetailers.map((retailer, idx) => (
                       <tr key={idx} className="border-b border-line-1 hover:bg-bg-2 transition">
                         <td className="py-3 px-4 font-medium">{retailer.retailer}</td>
                         <td className="py-3 px-4 text-ink-2">{retailer.channel}</td>
@@ -438,7 +507,7 @@ export const ProductTerminal: React.FC = () => {
           </CardHeader>
           <CardBody>
             <div className="space-y-3 max-h-96 overflow-y-auto">
-              {insights.map((insight) => (
+              {activeInsights.map((insight) => (
                 <div
                   key={insight.id}
                   className="p-4 rounded-lg border border-line-1"
