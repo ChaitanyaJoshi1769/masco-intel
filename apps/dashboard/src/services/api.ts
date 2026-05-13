@@ -98,6 +98,10 @@ export const dashboardAPI = {
   getOverview: () => apiClient.get('/api/analytics/dashboard/overview'),
   getMetrics: () => apiClient.get('/api/analytics/dashboard/metrics'),
   getTrends: () => apiClient.get('/api/analytics/dashboard/trends'),
+  getWatchlist: () => apiClient.get('/api/watchlist'),
+  getDigest: () => apiClient.get('/api/analytics/digest'),
+  getCategories: () => apiClient.get('/api/categories'),
+  getCategoryHeatmap: () => apiClient.get('/api/analytics/heatmap'),
 };
 
 export const productsAPI = {
@@ -108,6 +112,18 @@ export const productsAPI = {
     apiClient.get(`/api/pricing/${productId}`),
   getComparison: (productId: string) =>
     apiClient.get(`/api/comparison/${productId}`),
+  getComponents: (productId: string) =>
+    apiClient.get(`/api/products/${productId}/components`),
+  getLineage: (productId: string) =>
+    apiClient.get(`/api/products/${productId}/lineage`),
+  getRetailers: (productId: string) =>
+    apiClient.get(`/api/products/${productId}/retailers`),
+  getInsights: (productId: string) =>
+    apiClient.get(`/api/products/${productId}/insights`),
+  addToWatchlist: (productId: string) =>
+    apiClient.post(`/api/watchlist`, { productId }),
+  removeFromWatchlist: (productId: string) =>
+    apiClient.delete(`/api/watchlist/${productId}`),
 };
 
 export const marketplaceAPI = {
@@ -151,6 +167,27 @@ export const chatbotAPI = {
     }),
   markHelpful: (messageId: string, helpful: boolean) =>
     apiClient.post(`/api/chatbot/messages/${messageId}/helpful`, { helpful }),
+};
+
+export const authAPI = {
+  login: (email: string, password: string) =>
+    apiClient.post('/api/auth/login', { email, password }),
+  register: (email: string, password: string, name: string) =>
+    apiClient.post('/api/auth/register', { email, password, name }),
+  logout: () => apiClient.post('/api/auth/logout'),
+  refresh: () => apiClient.post('/api/auth/refresh'),
+  getProfile: () => apiClient.get('/api/auth/profile'),
+  updateProfile: (data: any) =>
+    apiClient.put('/api/auth/profile', data),
+};
+
+export const settingsAPI = {
+  getSettings: () => apiClient.get('/api/settings'),
+  updateSettings: (data: any) =>
+    apiClient.put('/api/settings', data),
+  getNotifications: () => apiClient.get('/api/settings/notifications'),
+  updateNotifications: (data: any) =>
+    apiClient.put('/api/settings/notifications', data),
 };
 
 export default apiClient;
